@@ -1,1 +1,1 @@
-rootProject.name = "my-idea-plugin"
+rootProject.name = "liaoxy-idea-helper"

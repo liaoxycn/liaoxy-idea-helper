@@ -1,11 +1,11 @@
 <idea-plugin>
     <id>cn.liaoxy.plugins</id>
-    <name>my-idea-plugins</name>
-    <vendor email="liaoxiangyun520@outlook.com" url="liaoxy.cn">liaoxy</vendor>
+    <name>liaoxy-idea-helper</name>
+    <vendor email="liaoxiangyun520@outlook.com" url="https://github.com/liaoxiangyun/liaoxy-idea-helper">liaoxy</vendor>
 
     <description><![CDATA[
         <h3>IDEA自定义插件大杂烩</h3>
-        <p><a href="https://github.com/liaoxiangyun/my-idea-plugin">https://github.com/liaoxiangyun/my-idea-plugin</a></p>
+        <p><a href="https://github.com/liaoxiangyun/liaoxy-idea-helper">https://github.com/liaoxiangyun/liaoxy-idea-helper</a></p>
         ]]></description>
 
     <!-- Product and plugin compatibility requirements -->

@@ -1,6 +1,6 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
-# my-idea-plugin Changelog
+# liaoxy-idea-helper Changelog
 
 ## [Unreleased]
 ### Added
