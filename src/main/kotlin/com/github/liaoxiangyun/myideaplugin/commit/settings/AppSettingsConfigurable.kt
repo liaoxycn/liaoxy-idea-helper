@@ -14,7 +14,7 @@ class AppSettingsConfigurable : Configurable {
     // is registered as an applicationConfigurable EP
     @Nls(capitalization = Nls.Capitalization.Title)
     override fun getDisplayName(): String {
-        return "myideaplugin: Git Commit template"
+        return "Git提交模版配置"
     }
 
     override fun getPreferredFocusedComponent(): JComponent {

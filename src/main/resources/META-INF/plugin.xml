@@ -18,7 +18,7 @@
         <applicationConfigurable parentId="tools"
                                  instance="com.github.liaoxiangyun.myideaplugin.commit.settings.AppSettingsConfigurable"
                                  id="com.github.liaoxiangyun.myideaplugin.commit.settings.AppSettingsConfigurable"
-                                 displayName="myideaplugin.commit.settings"/>
+                                 displayName="Git提交模版配置"/>
         <applicationService serviceImplementation="com.github.liaoxiangyun.myideaplugin.services.MyApplicationService"/>
         <projectService serviceImplementation="com.github.liaoxiangyun.myideaplugin.services.MyProjectService"/>
     </extensions>
