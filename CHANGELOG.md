@@ -4,4 +4,4 @@
 
 ## [Unreleased]
 ### Added
-- Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
+- 2021-06-17 : Git提交模版 [liaoxy-idea-helper-v0.0.1](https://github.com/liaoxiangyun/liaoxy-idea-helper/releases/tag/0.0.1)
