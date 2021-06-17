@@ -1,13 +1,24 @@
 <idea-plugin>
-    <id>com.github.liaoxiangyun.myideaplugin</id>
-    <name>my-idea-plugin</name>
-    <vendor>liaoxiangyun</vendor>
+    <id>cn.liaoxy.plugins</id>
+    <name>my-idea-plugins</name>
+    <vendor email="liaoxiangyun520@outlook.com" url="liaoxy.cn">liaoxy</vendor>
+
+    <description><![CDATA[
+        <h3>IDEA自定义插件大杂烩</h3>
+        <p><a href="https://github.com/liaoxiangyun/my-idea-plugin">https://github.com/liaoxiangyun/my-idea-plugin</a></p>
+        ]]></description>
 
     <!-- Product and plugin compatibility requirements -->
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <applicationService
+                serviceImplementation="com.github.liaoxiangyun.myideaplugin.commit.settings.AppSettingsState"/>
+        <applicationConfigurable parentId="tools"
+                                 instance="com.github.liaoxiangyun.myideaplugin.commit.settings.AppSettingsConfigurable"
+                                 id="com.github.liaoxiangyun.myideaplugin.commit.settings.AppSettingsConfigurable"
+                                 displayName="myideaplugin.commit.settings"/>
         <applicationService serviceImplementation="com.github.liaoxiangyun.myideaplugin.services.MyApplicationService"/>
         <projectService serviceImplementation="com.github.liaoxiangyun.myideaplugin.services.MyProjectService"/>
     </extensions>
@@ -16,4 +27,15 @@
         <listener class="com.github.liaoxiangyun.myideaplugin.listeners.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </applicationListeners>
+    <actions>
+        <action id="HelloWorld" class="com.github.liaoxiangyun.myideaplugin.actions.HelloWorld" text="Say Hello!">
+            <add-to-group group-id="WindowMenu" anchor="first"/>
+        </action>
+        <action id="Commit.Button" class="com.github.liaoxiangyun.myideaplugin.commit.CreateCommitAction"
+                text="创建提交模板"
+                description="创建提交模板"
+                icon="/icons/load.png">
+            <add-to-group group-id="Vcs.MessageActionGroup" anchor="first"/>
+        </action>
+    </actions>
 </idea-plugin>

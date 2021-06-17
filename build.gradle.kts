@@ -24,9 +24,19 @@ version = properties("pluginVersion")
 
 // Configure project's dependencies
 repositories {
+//    // 设置依赖库地址，由于墙的缘故，设置为阿里云镜像
+//    maven {
+//        url = uri("https://maven.aliyun.com/repository/jcenter")
+//    }
     mavenCentral()
 }
+
 dependencies {
+    // https://mvnrepository.com/artifact/org.jsoup/jsoup
+    implementation("org.jsoup:jsoup:1.13.1")
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation("com.google.code.gson:gson:2.8.7")
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.17.1")
 }
 
@@ -84,15 +94,15 @@ tasks {
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         pluginDescription.set(
-            File(projectDir, "README.md").readText().lines().run {
-                val start = "<!-- Plugin description -->"
-                val end = "<!-- Plugin description end -->"
+                File(projectDir, "README.md").readText().lines().run {
+                    val start = "<!-- Plugin description -->"
+                    val end = "<!-- Plugin description end -->"
 
-                if (!containsAll(listOf(start, end))) {
-                    throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
-                }
-                subList(indexOf(start) + 1, indexOf(end))
-            }.joinToString("\n").run { markdownToHTML(this) }
+                    if (!containsAll(listOf(start, end))) {
+                        throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                    }
+                    subList(indexOf(start) + 1, indexOf(end))
+                }.joinToString("\n").run { markdownToHTML(this) }
         )
 
         // Get the latest available change notes from the changelog file
