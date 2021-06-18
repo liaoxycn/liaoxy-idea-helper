@@ -250,7 +250,7 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
         button2?.addActionListener { e -> loadTaskID(e, "BugID") }
         button3?.addActionListener { e -> loadTaskID(e, "需求ID") }
 
-        typeChange(ChangeType.TYPE1)
+        typeChange(commitMessage?.changeType?: ChangeType.TYPE1)
     }
 
     private fun typeChange(changeType: ChangeType) {
