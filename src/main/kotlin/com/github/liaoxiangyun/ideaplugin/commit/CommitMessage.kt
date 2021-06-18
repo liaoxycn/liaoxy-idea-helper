@@ -1,5 +1,6 @@
-package com.github.liaoxiangyun.myideaplugin.commit
+package com.github.liaoxiangyun.ideaplugin.commit
 
+import com.github.liaoxiangyun.ideaplugin.commit.model.CommitLine
 import org.apache.commons.lang.StringUtils
 
 /**
@@ -19,6 +20,30 @@ class CommitMessage {
         this.lines = lines
     }
 
+    open fun getVerify(): String {
+        if (changeType == null) {
+            return "格式错误"
+        }
+        if (changeType?.lineNames()?.size !== lines?.size) {
+            return "格式错误"
+        }
+        for ((index, commitLine) in changeType!!.lineNames().withIndex()) {
+            val value = lines?.get(index)
+            if (commitLine.require) {
+                if (value == null || (value is String && value.trim() == "")) {
+                    return commitLine.lineName + "不能为空"
+                }
+            }
+            if (value != null && (value is String) && commitLine.regex != CommitLine.REGEX) {
+                val matcher = commitLine.regex.matcher(value)
+                if (!matcher.matches()) {
+                    return "格式错误"
+                }
+            }
+        }
+        return ""
+    }
+
     override fun toString(): String {
         val builder = StringBuilder()
         try {
@@ -27,7 +52,7 @@ class CommitMessage {
             builder.append(System.lineSeparator())
             for ((line, lineName) in this.changeType!!.lineNames().withIndex()) {
                 val value = this.lines!![line]
-                builder.append("【$lineName】：$value")
+                builder.append("【${lineName.lineName}】：$value")
                 builder.append(System.lineSeparator())
             }
         } catch (e: Exception) {
@@ -58,7 +83,7 @@ class CommitMessage {
                         }
                     } else {
                         val split1 = index.value.split("：")
-                        val name = commitMessage.changeType!!.lineNames()[line]
+                        val name = commitMessage.changeType!!.lineNames()[line].lineName
                         if ("【$name】" == split1[0].trim()) {
                             arr.add(split1[1])
                             line++

@@ -1,4 +1,4 @@
-package com.github.liaoxiangyun.myideaplugin
+package com.github.liaoxiangyun.ideaplugin
 
 import com.intellij.AbstractBundle
 import org.jetbrains.annotations.NonNls

@@ -1,6 +1,6 @@
-package com.github.liaoxiangyun.myideaplugin.services
+package com.github.liaoxiangyun.ideaplugin.services
 
-import com.github.liaoxiangyun.myideaplugin.MyBundle
+import com.github.liaoxiangyun.ideaplugin.MyBundle
 
 
 class MyApplicationService {

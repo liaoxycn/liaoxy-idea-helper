@@ -4,7 +4,7 @@
     <vendor email="liaoxiangyun520@outlook.com" url="https://github.com/liaoxiangyun/liaoxy-idea-helper">liaoxy</vendor>
 
     <description><![CDATA[
-        <h3>IDEA自定义插件大杂烩</h3>
+        <h3>idea helper</h3>
         <p><a href="https://github.com/liaoxiangyun/liaoxy-idea-helper">https://github.com/liaoxiangyun/liaoxy-idea-helper</a></p>
         ]]></description>
 
@@ -13,25 +13,28 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <checkinHandlerFactory
+                implementation="com.github.liaoxiangyun.ideaplugin.commit.vcs.AliCodeAnalysisCheckinHandlerFactory"
+                order="first"/>
         <applicationService
-                serviceImplementation="com.github.liaoxiangyun.myideaplugin.commit.settings.AppSettingsState"/>
+                serviceImplementation="com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState"/>
         <applicationConfigurable parentId="tools"
-                                 instance="com.github.liaoxiangyun.myideaplugin.commit.settings.AppSettingsConfigurable"
-                                 id="com.github.liaoxiangyun.myideaplugin.commit.settings.AppSettingsConfigurable"
+                                 instance="com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsConfigurable"
+                                 id="com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsConfigurable"
                                  displayName="Git提交模版配置"/>
-        <applicationService serviceImplementation="com.github.liaoxiangyun.myideaplugin.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.liaoxiangyun.myideaplugin.services.MyProjectService"/>
+        <applicationService serviceImplementation="com.github.liaoxiangyun.ideaplugin.services.MyApplicationService"/>
+        <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.services.MyProjectService"/>
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.liaoxiangyun.myideaplugin.listeners.MyProjectManagerListener"
+        <listener class="com.github.liaoxiangyun.ideaplugin.listeners.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </applicationListeners>
     <actions>
-        <action id="HelloWorld" class="com.github.liaoxiangyun.myideaplugin.actions.HelloWorld" text="Say Hello!">
+        <action id="HelloWorld" class="com.github.liaoxiangyun.ideaplugin.actions.HelloWorld" text="Say Hello!">
             <add-to-group group-id="WindowMenu" anchor="first"/>
         </action>
-        <action id="Commit.Button" class="com.github.liaoxiangyun.myideaplugin.commit.CreateCommitAction"
+        <action id="Commit.Button" class="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction"
                 text="创建提交模板"
                 description="创建提交模板"
                 icon="/icons/load.png">

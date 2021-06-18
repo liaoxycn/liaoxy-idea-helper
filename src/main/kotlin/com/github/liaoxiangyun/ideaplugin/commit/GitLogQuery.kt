@@ -1,4 +1,4 @@
-package com.github.liaoxiangyun.myideaplugin.commit
+package com.github.liaoxiangyun.ideaplugin.commit
 
 import java.io.BufferedReader
 import java.io.File

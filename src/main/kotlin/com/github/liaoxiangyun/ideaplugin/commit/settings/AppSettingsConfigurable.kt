@@ -1,4 +1,4 @@
-package com.github.liaoxiangyun.myideaplugin.commit.settings
+package com.github.liaoxiangyun.ideaplugin.commit.settings
 
 import com.intellij.openapi.options.Configurable
 import org.jetbrains.annotations.Nls

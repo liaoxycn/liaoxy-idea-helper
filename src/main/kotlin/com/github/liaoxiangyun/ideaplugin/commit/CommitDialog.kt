@@ -1,7 +1,7 @@
 package org.jetbrains.plugins.template.commit
 
-import com.github.liaoxiangyun.myideaplugin.commit.CommitMessage
-import com.github.liaoxiangyun.myideaplugin.commit.CommitPanel
+import com.github.liaoxiangyun.ideaplugin.commit.CommitMessage
+import com.github.liaoxiangyun.ideaplugin.commit.CommitPanel
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import javax.swing.JComponent

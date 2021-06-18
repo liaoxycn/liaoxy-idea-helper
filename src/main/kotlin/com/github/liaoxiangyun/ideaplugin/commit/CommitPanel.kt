@@ -1,7 +1,8 @@
-package com.github.liaoxiangyun.myideaplugin.commit
+package com.github.liaoxiangyun.ideaplugin.commit
 
-import com.github.liaoxiangyun.myideaplugin.commit.settings.AppSettingsState
-import com.github.liaoxiangyun.myideaplugin.commit.util.HttpHelper
+import com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState
+import com.github.liaoxiangyun.ideaplugin.commit.util.HttpHelper
+import com.github.liaoxiangyun.ideaplugin.commit.util.Util
 import com.intellij.openapi.project.Project
 import com.intellij.util.containers.map2Array
 import java.awt.event.ActionEvent
@@ -17,7 +18,7 @@ import javax.swing.text.JTextComponent
  * @author Damien Arrachequesne
  */
 class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) {
-    var settings: AppSettingsState = AppSettingsState.instance
+    var settings: AppSettingsState = AppSettingsState.getConfig()
 
     var mainPanel: JPanel? = null
     var label21: JLabel? = null
@@ -129,7 +130,7 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
             var arr = arrayListOf<Any>()
             getJComponentByType(selectedChangeType!!).forEach {
                 if (isJComponent(it)) {
-                    arr.add(getValue(it!!) ?: "")
+                    arr.add(Util.getValue(it!!) ?: "")
                 }
             }
             return CommitMessage(
@@ -159,15 +160,13 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
             val buttons = changeTypeGroup!!.elements
             while (buttons.hasMoreElements()) {
                 val button = buttons.nextElement()
-                if (button.actionCommand.equals(commitMessage.changeType!!.label(), ignoreCase = true)) {
-                    button.isSelected = true
-                }
+                button.isSelected = button.actionCommand.equals(commitMessage.changeType!!.label(), ignoreCase = true)
             }
             var line = 0
             getJComponentByType(commitMessage.changeType!!).forEach {
                 if (isJComponent(it)) {
                     var get = commitMessage.lines?.get(line)
-                    setValue(it!!, get!!)
+                    Util.setValue(it!!, get!!)
                     line++
                 }
             }
@@ -182,66 +181,6 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
         return false
     }
 
-    /**
-     * 设置值
-     */
-    private fun setValue(component: Any, value: Any) {
-        when (component) {
-            is JTextComponent -> {
-                component.text = value.toString()
-            }
-            is JCheckBox -> {
-                component.isSelected = (value as Boolean)
-            }
-            is JComboBox<*> -> {
-                component.selectedItem = value
-            }
-            is ButtonGroup -> {
-                val buttons = component.elements
-                while (buttons.hasMoreElements()) {
-                    val button = buttons.nextElement()
-                    if (button.actionCommand.equals((value as ChangeType).label(), ignoreCase = true)) {
-                        button.isSelected = true
-                    }
-                }
-            }
-        }
-    }
-
-    private var ID_P: Pattern = Pattern.compile("#(\\d+)")
-
-    /**
-     * 设置值
-     */
-    private fun getValue(component: JComponent): Any? {
-        when (component) {
-            is JTextComponent -> {
-                return component.text
-            }
-            is JCheckBox -> {
-                return component.isSelected
-            }
-            is JComboBox<*> -> {
-                if (component.selectedItem != null) {
-                    val matcher = ID_P.matcher((component.selectedItem as String))
-                    if (matcher.find()) {
-                        return matcher.group(1)
-                    }
-                }
-                return component.selectedItem
-            }
-            is ButtonGroup -> {
-                val buttons = component.elements
-                while (buttons.hasMoreElements()) {
-                    val button = buttons.nextElement()
-                    if (button.isSelected) {
-                        return ChangeType.valueOf(button.actionCommand.toUpperCase())
-                    }
-                }
-            }
-        }
-        return null
-    }
 
     init {
         lList = arrayOf(t1, t2, t3, t4, t5)
@@ -261,23 +200,8 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
                 selected = button
             }
             button.addActionListener { e ->
-                hideAll()
-                val list = getJComponentByType(ChangeType.valueOf(e.actionCommand.toUpperCase()))
-                var count = 0
-                list.forEach {
-                    it?.show()
-                    if (isJComponent(it)) {
-                        count++
-                    }
-                }
-                showBottom(7 - count)
+                typeChange(ChangeType.valueOf(e.actionCommand.toUpperCase()))
             }
-        }
-        if (textField4?.text?.trim()?.length ?: 0 == 0) {
-            textField4?.text = settings.responsiblePerson
-        }
-        if (textField5?.text?.trim()?.length ?: 0 == 0) {
-            textField5?.text = settings.inspector
         }
         val pattern: Pattern = Pattern.compile("#\\d+(.*)")
         //
@@ -326,11 +250,27 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
         button2?.addActionListener { e -> loadTaskID(e, "BugID") }
         button3?.addActionListener { e -> loadTaskID(e, "需求ID") }
 
-        val changeType = ChangeType.valueOf(selected!!.actionCommand.toUpperCase())
+        typeChange(ChangeType.TYPE1)
+    }
+
+    private fun typeChange(changeType: ChangeType) {
         hideAll()
-        getJComponentByType(changeType).forEach { it?.show() }
-        showBottom(0)
-        //mainPanel?.add(JLabel("hello"))
+        val list = getJComponentByType(changeType)
+        var lines = 0
+        list.forEach {
+            it?.show()
+            if (isJComponent(it)) {
+                val value = Util.getValue(it!!)
+                var commitLine = changeType.lineNames()[lines]
+                if (!Util.isEmpty(commitLine.fixedVal)) {
+                    Util.setValue(it!!, commitLine.fixedVal!!)
+                } else if (Util.isEmpty(value) && !Util.isEmpty(commitLine.defVal)) {
+                    Util.setValue(it!!, commitLine.defVal!!)
+                }
+                lines++
+            }
+        }
+        showBottom(7 - lines)
     }
 
     private fun showBottom(i: Int) {
@@ -389,8 +329,7 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
     private fun getJComponentByType(changeType: ChangeType): ArrayList<JComponent?> {
         when (changeType) {
             ChangeType.TYPE1 -> {
-                val arr = getChangeTypeJComponents()
-                arr.addAll(arrayListOf(
+                return arrayListOf(
                         label2, textField1,
                         label3, changeScope, button1,
                         label4, comboBox2, button3,
@@ -398,12 +337,10 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
                         label6, textField3,
                         label7, textField4,
                         label8, textField5,
-                ))
-                return arr
+                )
             }
             ChangeType.TYPE2 -> {
-                val arr = getChangeTypeJComponents()
-                arr.addAll(arrayListOf(
+                return arrayListOf(
                         label9, textField6,
                         label10, comboBox1, button2,
                         label11, textField9,
@@ -411,12 +348,10 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
                         label6, textField3,
                         label7, textField4,
                         label8, textField5,
-                ))
-                return arr
+                )
             }
             ChangeType.TYPE3 -> {
-                val arr = getChangeTypeJComponents()
-                arr.addAll(arrayListOf(
+                return arrayListOf(
                         label3, changeScope, button1,
                         label12, textField10,
                         label13, textField11,
@@ -424,12 +359,10 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
                         label6, textField3,
                         label7, textField4,
                         label8, textField5,
-                ))
-                return arr
+                )
             }
             ChangeType.TYPE4 -> {
-                val arr = getChangeTypeJComponents()
-                arr.addAll(arrayListOf(
+                return arrayListOf(
                         label3, changeScope, button1,
                         label12, textField10,
                         label13, textField11,
@@ -437,12 +370,10 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
                         label6, textField3,
                         label7, textField4,
                         label8, textField5,
-                ))
-                return arr
+                )
             }
             ChangeType.TYPE5 -> {
-                val arr = getChangeTypeJComponents()
-                arr.addAll(arrayListOf(
+                return arrayListOf(
                         label3, changeScope, button1,
                         label15, textField13,
                         label16, textField14,
@@ -450,45 +381,31 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
                         label6, textField3,
                         label7, textField4,
                         label8, textField5,
-                ))
-                return arr
+                )
             }
             ChangeType.TYPE6 -> {
-                val arr = getChangeTypeJComponents()
-                arr.addAll(arrayListOf(
-                        label2, textField1,
+                return arrayListOf(
+                        label3, changeScope,
                         label17, textField15,
-                ))
-                return arr
+                )
             }
             ChangeType.TYPE7 -> {
-                val arr = getChangeTypeJComponents()
-                arr.addAll(arrayListOf(
-                        label2, textField1,
+                return arrayListOf(
+                        label3, changeScope,
                         label17, textField15,
-                ))
-                return arr
+                )
             }
             ChangeType.TYPE8 -> {
-                val arr = getChangeTypeJComponents()
-                arr.addAll(arrayListOf(
+                return arrayListOf(
                         label5, textField7,
                         label6, textField3,
-                ))
-                return arr
+                )
             }
         }
         return arrayListOf()
     }
 
     private fun hideAll() {
-        getJComponentByType(ChangeType.TYPE1).forEach { it?.hide() }
-        getJComponentByType(ChangeType.TYPE2).forEach { it?.hide() }
-        getJComponentByType(ChangeType.TYPE3).forEach { it?.hide() }
-        getJComponentByType(ChangeType.TYPE4).forEach { it?.hide() }
-        getJComponentByType(ChangeType.TYPE5).forEach { it?.hide() }
-        getJComponentByType(ChangeType.TYPE6).forEach { it?.hide() }
-        getJComponentByType(ChangeType.TYPE7).forEach { it?.hide() }
-        getJComponentByType(ChangeType.TYPE8).forEach { it?.hide() }
+        ChangeType.values().forEach { it -> getJComponentByType(it).forEach { it?.hide() } }
     }
 }

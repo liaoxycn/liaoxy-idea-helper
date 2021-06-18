@@ -1,4 +1,4 @@
-package com.github.liaoxiangyun.myideaplugin.commit.settings
+package com.github.liaoxiangyun.ideaplugin.commit.settings
 
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.ServiceManager
@@ -11,7 +11,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil
  * The [State] and [Storage] annotations define the name of the data and the file name where
  * these persistent application settings are stored.
  */
-@State(name = "com.github.liaoxiangyun.myideaplugin.commit.settings.AppSettingsState", storages = [Storage("SdkSettingsPlugin.xml")])
+@State(name = "com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState", storages = [Storage("MySettings.xml")])
 class AppSettingsState : PersistentStateComponent<AppSettingsState> {
 
     var userId = "John Q. Public"
@@ -23,6 +23,8 @@ class AppSettingsState : PersistentStateComponent<AppSettingsState> {
     var taskList = arrayListOf<String>()
     var bugList = arrayListOf<String>()
     var storyList = arrayListOf<String>()
+
+    var analysisBeforeCheckin = true
 
     /**
      * 责任人
@@ -43,10 +45,16 @@ class AppSettingsState : PersistentStateComponent<AppSettingsState> {
     }
 
     companion object {
+        private var c: AppSettingsState? = null
+        open fun getConfig(): AppSettingsState {
+            if (c == null) {
+                c = instance
+            }
+            return c!!
+        }
+
         val instance: AppSettingsState
             get() = ServiceManager.getService(AppSettingsState::class.java)
     }
 
-    init {
-    }
 }

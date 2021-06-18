@@ -1,6 +1,6 @@
-package com.github.liaoxiangyun.myideaplugin.commit.util
+package com.github.liaoxiangyun.ideaplugin.commit.util
 
-import com.github.liaoxiangyun.myideaplugin.commit.settings.AppSettingsState
+import com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
