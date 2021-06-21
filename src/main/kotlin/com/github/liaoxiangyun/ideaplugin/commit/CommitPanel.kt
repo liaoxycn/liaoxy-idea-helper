@@ -243,14 +243,14 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
                 }
             }
         }
-        changeScope?.model = DefaultComboBoxModel(settings.taskList.map2Array { s -> s })
-        comboBox1?.model = DefaultComboBoxModel(settings.bugList.map2Array { s -> s })
-        comboBox2?.model = DefaultComboBoxModel(settings.storyList.map2Array { s -> s })
+        setDefItem(changeScope, settings.taskList)
+        setDefItem(comboBox1, settings.bugList)
+        setDefItem(comboBox2, settings.storyList)
         button1?.addActionListener { e -> loadTaskID(e, "任务ID") }
         button2?.addActionListener { e -> loadTaskID(e, "BugID") }
         button3?.addActionListener { e -> loadTaskID(e, "需求ID") }
 
-        typeChange(commitMessage?.changeType?: ChangeType.TYPE1)
+        typeChange(commitMessage?.changeType ?: ChangeType.TYPE1)
     }
 
     private fun typeChange(changeType: ChangeType) {
@@ -283,34 +283,35 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
         }
     }
 
+    private fun setDefItem(jComboBox: JComboBox<String>?, array: List<String>) {
+        val selectedItem = jComboBox?.selectedItem ?: ""
+        var list: ArrayList<String> = arrayListOf()
+        list.add(selectedItem as String)
+        list.addAll(array)
+        val cbm: ComboBoxModel<String> = DefaultComboBoxModel(list.map2Array { s -> s })
+        jComboBox?.model = cbm
+        jComboBox?.selectedItem = selectedItem
+    }
+
     private fun loadTaskID(e: ActionEvent, name: String) {
         when (name) {
             "任务ID" -> {
-                val taskList = HttpHelper().getTaskList()
-                val list = taskList.map { tr -> "任务#${tr[0]} ${tr[3]}" }
-                if (taskList.size > 0) {
-                    settings.taskList = list as ArrayList<String>
-                }
-                val cbm: ComboBoxModel<String> = DefaultComboBoxModel(list.map2Array { s -> s })
-                changeScope?.model = cbm
+                val dataList = HttpHelper().getTaskList()
+                var list = dataList.map { tr -> "任务#${tr[0]} ${tr[3]}" }
+                settings.taskList = list as ArrayList<String>
+                setDefItem(changeScope, list)
             }
             "BugID" -> {
-                val bugList = HttpHelper().getBugList()
-                val list = bugList.map { tr -> "Bug#${tr[0]} 【${tr[3]}】 ${tr[4]}" }
-                if (bugList.size > 0) {
-                    settings.bugList = list as ArrayList<String>
-                }
-                val cbm: ComboBoxModel<String> = DefaultComboBoxModel(list.map2Array { s -> s })
-                comboBox1?.model = cbm
+                val dataList = HttpHelper().getTaskList()
+                val list = dataList.map { tr -> "Bug#${tr[0]} 【${tr[3]}】 ${tr[4]}" }
+                settings.bugList = list as ArrayList<String>
+                setDefItem(comboBox1, list)
             }
             "需求ID" -> {
-                val storyList = HttpHelper().getStoryList()
-                val list = storyList.map { tr -> "需求#${tr[0]} ${tr[3]}" }
-                if (storyList.size > 0) {
-                    settings.storyList = list as ArrayList<String>
-                }
-                val cbm: ComboBoxModel<String> = DefaultComboBoxModel(list.map2Array { s -> s })
-                comboBox2?.model = cbm
+                val dataList = HttpHelper().getTaskList()
+                val list = dataList.map { tr -> "需求#${tr[0]} ${tr[3]}" }
+                settings.storyList = list as ArrayList<String>
+                setDefItem(comboBox2, list)
             }
         }
     }
@@ -385,13 +386,13 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
             }
             ChangeType.TYPE6 -> {
                 return arrayListOf(
-                        label3, changeScope,
+                        label3, changeScope, button1,
                         label17, textField15,
                 )
             }
             ChangeType.TYPE7 -> {
                 return arrayListOf(
-                        label3, changeScope,
+                        label3, changeScope, button1,
                         label17, textField15,
                 )
             }
