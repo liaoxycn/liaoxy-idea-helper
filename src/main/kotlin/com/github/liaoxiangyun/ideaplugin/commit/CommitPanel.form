@@ -34,12 +34,7 @@
         </constraints>
         <properties>
           <editable value="true"/>
-          <model>
-            <item value="Bug#85741"/>
-            <item value="Bug#77345"/>
-            <item value="Bug#64322"/>
-            <item value="Bug#78888"/>
-          </model>
+          <model/>
         </properties>
       </component>
       <component id="18977" class="javax.swing.JLabel" binding="label2">
@@ -384,12 +379,7 @@
         </constraints>
         <properties>
           <editable value="true"/>
-          <model>
-            <item value="Bug#85741"/>
-            <item value="Bug#77345"/>
-            <item value="Bug#64322"/>
-            <item value="Bug#78888"/>
-          </model>
+          <model/>
         </properties>
       </component>
       <component id="bde43" class="javax.swing.JComboBox" binding="comboBox2" default-binding="true">
@@ -398,12 +388,7 @@
         </constraints>
         <properties>
           <editable value="true"/>
-          <model>
-            <item value="Bug#85741"/>
-            <item value="Bug#77345"/>
-            <item value="Bug#64322"/>
-            <item value="Bug#78888"/>
-          </model>
+          <model/>
         </properties>
       </component>
       <component id="89453" class="javax.swing.JTextField" binding="t1">
