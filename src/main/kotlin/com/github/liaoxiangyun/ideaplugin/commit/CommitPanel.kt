@@ -302,13 +302,13 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
                 setDefItem(changeScope, list)
             }
             "BugID" -> {
-                val dataList = HttpHelper().getTaskList()
+                val dataList = HttpHelper().getBugList()
                 val list = dataList.map { tr -> "Bug#${tr[0]} 【${tr[3]}】 ${tr[4]}" }
                 settings.bugList = list as ArrayList<String>
                 setDefItem(comboBox1, list)
             }
             "需求ID" -> {
-                val dataList = HttpHelper().getTaskList()
+                val dataList = HttpHelper().getStoryList()
                 val list = dataList.map { tr -> "需求#${tr[0]} ${tr[3]}" }
                 settings.storyList = list as ArrayList<String>
                 setDefItem(comboBox2, list)
