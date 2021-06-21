@@ -2,7 +2,6 @@ package com.github.liaoxiangyun.ideaplugin.commit
 
 import com.github.liaoxiangyun.ideaplugin.commit.model.CommitLine
 import com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState
-import java.util.regex.Pattern
 
 /**
  * From https://github.com/commitizen/conventional-commit-types
@@ -74,14 +73,14 @@ enum class ChangeType(private val title: String, private val description: String
      * 代码格式化
      */
     TYPE6("代码格式化", "代码格式化", arrayListOf(
-            CommitLine("任务ID", true, Pattern.compile("aaaaa"), "aaaaa", "aaaaa"),
+            CommitLine("任务ID", true, null, "aaaaa", "aaaaa"),
             CommitLine("备注", true, null))),
 
     /**
      * 代码迁移
      */
     TYPE7("代码迁移", "代码迁移", arrayListOf(
-            CommitLine("任务ID", true, Pattern.compile("bbbbb"), "bbbbb", "bbbbb"),
+            CommitLine("任务ID", true, null, "bbbbb", "bbbbb"),
             CommitLine("备注", true, null, "CI统计时默认排除。"))),
 
     /**
