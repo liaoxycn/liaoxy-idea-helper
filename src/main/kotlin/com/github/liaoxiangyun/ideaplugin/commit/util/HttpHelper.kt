@@ -6,6 +6,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
 import java.io.IOException
 
 
@@ -60,61 +61,41 @@ class HttpHelper {
     }
 
 
-    open fun getBugList(): ArrayList<ArrayList<String>> {
-        val bugHtml = getHtml(origin + bugUrl)
-        val document: Document = Jsoup.parse(bugHtml)
-        val tbody = document.getElementsByTag("tbody").first()
+    private fun getTBodyTdTextList(tbody: Element?): ArrayList<ArrayList<String>> {
         var trList = arrayListOf<ArrayList<String>>()
         if (tbody == null) {
-            println("getBugList is null")
+            println("tbody is null")
             return trList
         }
         for (trIndex in tbody.getElementsByTag("tr").withIndex()) {
             var tdList = arrayListOf<String>()
             for (tdIndex in trIndex.value.getElementsByTag("td").withIndex()) {
-                tdList.add(tdIndex.value.text())
+                tdList.add(tdIndex.value.text().trim())
             }
             trList.add(tdList)
         }
         return trList
+    }
+
+    open fun getBugList(): ArrayList<ArrayList<String>> {
+        val bugHtml = getHtml(origin + bugUrl)
+        val document: Document = Jsoup.parse(bugHtml)
+        val tbody = document.getElementsByTag("tbody").first()
+        return getTBodyTdTextList(tbody)
     }
 
     open fun getStoryList(): ArrayList<ArrayList<String>> {
         val storyHtml = getHtml(origin + storyUrl)
         val document: Document = Jsoup.parse(storyHtml)
         val tbody = document.getElementsByTag("tbody").first()
-        var trList = arrayListOf<ArrayList<String>>()
-        if (tbody == null) {
-            println("getStoryList is null")
-            return trList
-        }
-        for (trIndex in tbody.getElementsByTag("tr").withIndex()) {
-            var tdList = arrayListOf<String>()
-            for (tdIndex in trIndex.value.getElementsByTag("td").withIndex()) {
-                tdList.add(tdIndex.value.text())
-            }
-            trList.add(tdList)
-        }
-        return trList
+        return getTBodyTdTextList(tbody)
     }
 
     open fun getTaskList(): ArrayList<ArrayList<String>> {
         val taskHtml = getHtml(origin + taskUrl)
         val document: Document = Jsoup.parse(taskHtml)
         val tbody = document.getElementsByTag("tbody").first()
-        var trList = arrayListOf<ArrayList<String>>()
-        if (tbody == null) {
-            println("getTaskList is null")
-            return trList
-        }
-        for (trIndex in tbody.getElementsByTag("tr").withIndex()) {
-            var tdList = arrayListOf<String>()
-            for (tdIndex in trIndex.value.getElementsByTag("td").withIndex()) {
-                tdList.add(tdIndex.value.text())
-            }
-            trList.add(tdList)
-        }
-        return trList
+        return getTBodyTdTextList(tbody)
     }
 
 

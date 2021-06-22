@@ -8,7 +8,7 @@ import com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState
  *
  * @author Damien Arrachequesne
  */
-enum class ChangeType(private val title: String, private val description: String, private val lineNames: List<CommitLine>) {
+enum class ChangeType(private val title: String, private val description: String, private val commitLines: List<CommitLine>) {
     /**
      * 开发新功能
      */
@@ -103,8 +103,8 @@ enum class ChangeType(private val title: String, private val description: String
     }
 
 
-    fun lineNames(): List<CommitLine> {
-        return lineNames
+    fun commitLines(): List<CommitLine> {
+        return commitLines
     }
 
 

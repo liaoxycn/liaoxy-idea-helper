@@ -9,6 +9,8 @@ class CommitLine {
     var defVal: Any? = null
     var fixedVal: Any? = null
 
+    var component: Any? = null
+
     constructor(
             lineName: String, require: Boolean, regex: Pattern?,
             defVal: Any? = null,
@@ -24,9 +26,9 @@ class CommitLine {
     override fun toString(): String {
         return "$lineName [" +
                 (if (require) "require=$require, " else "") +
-                (if (regex!= REGEX) "regex=${regex.toRegex().pattern}, " else "") +
-                (if (defVal!=null) "defVal=$defVal, " else "") +
-                (if (fixedVal!=null) "fixedVal=$fixedVal, " else "") +
+                (if (regex != REGEX) "regex=${regex.toRegex().pattern}, " else "") +
+                (if (defVal != null) "defVal=$defVal, " else "") +
+                (if (fixedVal != null) "fixedVal=$fixedVal, " else "") +
                 "]"
     }
 

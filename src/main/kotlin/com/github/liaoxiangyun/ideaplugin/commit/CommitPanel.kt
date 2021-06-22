@@ -127,15 +127,18 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
 
     val commitMessage: CommitMessage
         get() {
-            var arr = arrayListOf<Any>()
-            getJComponentByType(selectedChangeType!!).forEach {
+            val changeType = selectedChangeType!!
+            var line = 0
+            var map: MutableMap<String, Any> = mutableMapOf()
+            getJComponentByType(changeType).forEach {
                 if (isJComponent(it)) {
-                    arr.add(Util.getValue(it!!) ?: "")
+                    map[changeType.commitLines()[line].lineName] = Util.getValue(it!!) ?: ""
+                    line++
                 }
             }
             return CommitMessage(
                     selectedChangeType,
-                    arr
+                    map
             )
         }
 
@@ -165,8 +168,8 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
             var line = 0
             getJComponentByType(commitMessage.changeType!!).forEach {
                 if (isJComponent(it)) {
-                    var get = commitMessage.lines?.get(line)
-                    Util.setValue(it!!, get!!)
+                    val get = commitMessage.map[commitMessage.changeType!!.commitLines()[line].lineName]
+                    Util.setValue(it!!, get)
                     line++
                 }
             }
@@ -261,7 +264,7 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
             it?.show()
             if (isJComponent(it)) {
                 val value = Util.getValue(it!!)
-                var commitLine = changeType.lineNames()[lines]
+                var commitLine = changeType.commitLines()[lines]
                 if (!Util.isEmpty(commitLine.fixedVal)) {
                     Util.setValue(it!!, commitLine.fixedVal!!)
                 } else if (Util.isEmpty(value) && !Util.isEmpty(commitLine.defVal)) {
@@ -314,17 +317,6 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
                 setDefItem(comboBox2, list)
             }
         }
-    }
-
-    private fun getChangeTypeJComponents(): ArrayList<JComponent?> {
-        val arr = arrayListOf<JComponent?>()
-        val buttons = changeTypeGroup!!.elements
-        while (buttons.hasMoreElements()) {
-            val button = buttons.nextElement()
-            arr.add(button)
-        }
-        arr.add(label1)
-        return arr
     }
 
     private fun getJComponentByType(changeType: ChangeType): ArrayList<JComponent?> {

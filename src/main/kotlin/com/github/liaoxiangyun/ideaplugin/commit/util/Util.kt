@@ -59,23 +59,27 @@ class Util {
         /**
          * 设置值
          */
-        open fun setValue(component: Any, value: Any) {
+        open fun setValue(component: Any, value: Any?) {
             when (component) {
                 is JTextComponent -> {
-                    component.text = value.toString()
+                    component.text = if (isEmpty(value)) "" else value.toString()
                 }
                 is JCheckBox -> {
-                    component.isSelected = (value as Boolean)
+                    component.isSelected = if (isEmpty(value)) false else (value as Boolean)
                 }
                 is JComboBox<*> -> {
-                    component.selectedItem = value
+                    component.selectedItem = if (isEmpty(value)) "" else value
                 }
                 is ButtonGroup -> {
                     val buttons = component.elements
-                    while (buttons.hasMoreElements()) {
-                        val button = buttons.nextElement()
-                        if (button.actionCommand.equals((value as ChangeType).label(), ignoreCase = true)) {
-                            button.isSelected = true
+                    if (isEmpty(value) && buttons.hasMoreElements()) {
+                        buttons.nextElement().isSelected = true
+                    } else {
+                        while (buttons.hasMoreElements()) {
+                            val button = buttons.nextElement()
+                            if (button.actionCommand.equals((value as ChangeType).label(), ignoreCase = true)) {
+                                button.isSelected = true
+                            }
                         }
                     }
                 }

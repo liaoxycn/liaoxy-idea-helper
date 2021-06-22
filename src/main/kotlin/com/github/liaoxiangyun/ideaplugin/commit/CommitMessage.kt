@@ -1,7 +1,7 @@
 package com.github.liaoxiangyun.ideaplugin.commit
 
 import com.github.liaoxiangyun.ideaplugin.commit.model.CommitLine
-import org.apache.commons.lang.StringUtils
+import com.github.liaoxiangyun.ideaplugin.commit.util.Util
 
 /**
  * @author Damien Arrachequesne <damien.arrachequesne></damien.arrachequesne>@gmail.com>
@@ -9,28 +9,26 @@ import org.apache.commons.lang.StringUtils
 class CommitMessage {
     var changeType: ChangeType? = null
         private set
-    var lines: ArrayList<Any>? = null
+
+    var map: MutableMap<String, Any> = mutableMapOf()
 
     private constructor() {
-        lines = arrayListOf()
+
     }
 
-    constructor(changeType: ChangeType?, lines: ArrayList<Any>) {
+    constructor(changeType: ChangeType?, map: MutableMap<String, Any>) {
         this.changeType = changeType
-        this.lines = lines
+        this.map = map
     }
 
     open fun getVerify(): String {
         if (changeType == null) {
             return "格式错误"
         }
-        if (changeType?.lineNames()?.size !== lines?.size) {
-            return "格式错误"
-        }
-        for ((index, commitLine) in changeType!!.lineNames().withIndex()) {
-            val value = lines?.get(index)
+        for (commitLine in changeType!!.commitLines()) {
+            val value = this.map[commitLine.lineName]
             if (commitLine.require) {
-                if (value == null || (value is String && value.trim() == "")) {
+                if (Util.isEmpty(value)) {
                     return commitLine.lineName + "不能为空"
                 }
             }
@@ -50,9 +48,12 @@ class CommitMessage {
             builder.append("【修改类型】：")
             builder.append(changeType!!.title())
             builder.append(System.lineSeparator())
-            for ((line, lineName) in this.changeType!!.lineNames().withIndex()) {
-                val value = this.lines!![line]
-                builder.append("【${lineName.lineName}】：$value")
+            for (commitLine in this.changeType!!.commitLines()) {
+                val value = this.map[commitLine.lineName]
+                if (!commitLine.require && Util.isEmpty(value)) {
+                    continue
+                }
+                builder.append("【${commitLine.lineName}】：$value")
                 builder.append(System.lineSeparator())
             }
         } catch (e: Exception) {
@@ -60,38 +61,26 @@ class CommitMessage {
         return builder.toString()
     }
 
-    private fun formatClosedIssue(closedIssue: String): String {
-        val trimmed = closedIssue.trim { it <= ' ' }
-        return (if (StringUtils.isNumeric(trimmed)) "#" else "") + trimmed
-    }
-
     companion object {
         fun parse(message: String): CommitMessage {
             val commitMessage = CommitMessage()
             try {
                 val split = message.trim().split("\n【").map { if (it.startsWith("【")) it else "【$it" }
-                var line = 0
-                var arr = arrayListOf<Any>()
                 for (index in split.withIndex()) {
-                    if (index.index === 0) {
-                        val split1 = index.value.split("：")
-                        val name = ChangeType.TYPE_NAME
-                        if ("【$name】" == split1[0].trim()) {
-                            commitMessage.changeType = ChangeType.titleOf(split1[1].trim())!!
-                        } else {
-                            break
+                    val split1 = index.value.split("：")
+                    val key = split1[0]?.trim().trim { it == '【' || it == '】' }
+                    val value = split1[1]?.trim()
+                    if (!Util.isEmpty(key)) {
+                        commitMessage.map[key] = value
+                        if (ChangeType.TYPE_NAME == key) {
+                            commitMessage.changeType = ChangeType.titleOf(value)!!
                         }
                     } else {
-                        val split1 = index.value.split("：")
-                        val name = commitMessage.changeType!!.lineNames()[line].lineName
-                        if ("【$name】" == split1[0].trim()) {
-                            arr.add(split1[1])
-                            line++
-                        }
+                        continue
                     }
                 }
-                commitMessage.lines = arr
             } catch (e: RuntimeException) {
+                println("CommitMessage parse error!!  \n" + e.message)
             }
             return commitMessage
         }
