@@ -9,7 +9,15 @@
 - [ ] task2
 
 <!-- Plugin description -->
-idea helper
+IDEA helper<br>
+  This plug-in integrates various customized functions<br>
+  At present, it has achieved the following goals:<br>
+  【Git commit template】<br>
+  This plugin allows to create a commit message with the following template:<br>
+  【label1】: describe<br>
+  【label2】: describe<br>
+  ...<br>
+  Various functions will be updated later ...  <br>
 <!-- Plugin description end -->
 
 ## Installation
