@@ -48,6 +48,6 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 
 ![Commit-step3](src/main/resources/imgs/3.jpg)
 
-![Commit-step4](src/main/resources/imgs/3.jpg)
+![Commit-step4](src/main/resources/imgs/4.jpg)
 
-![Commit-step5](src/main/resources/imgs/3.jpg)
+![Commit-step5](src/main/resources/imgs/5.jpg)
