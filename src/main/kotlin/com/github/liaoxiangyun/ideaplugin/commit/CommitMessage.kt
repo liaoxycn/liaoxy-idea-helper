@@ -2,6 +2,7 @@ package com.github.liaoxiangyun.ideaplugin.commit
 
 import com.github.liaoxiangyun.ideaplugin.commit.model.CommitLine
 import com.github.liaoxiangyun.ideaplugin.commit.util.Util
+import java.util.regex.Pattern
 
 /**
  * @author Damien Arrachequesne <damien.arrachequesne></damien.arrachequesne>@gmail.com>
@@ -65,11 +66,12 @@ class CommitMessage {
         fun parse(message: String): CommitMessage {
             val commitMessage = CommitMessage()
             try {
-                val split = message.trim().split("\n【").map { if (it.startsWith("【")) it else "【$it" }
-                for (index in split.withIndex()) {
-                    val split1 = index.value.split("：")
-                    val key = split1[0]?.trim().trim { it == '【' || it == '】' }
-                    val value = split1[1]?.trim()
+                val linesSplit = message.trim().split("\n【").map { if (it.startsWith("【")) it else "【$it" }
+                for (index in linesSplit.withIndex()) {
+                    val lineSplit = index.value.split(Pattern.compile("】\\s*[:：]"))
+                    if (lineSplit.size < 2) continue
+                    val key = lineSplit[0].trim().trim { it == '【' || it == '】' }
+                    val value = lineSplit[1].trim()
                     if (!Util.isEmpty(key)) {
                         commitMessage.map[key] = value
                         if (ChangeType.TYPE_NAME == key) {

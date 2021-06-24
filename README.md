@@ -10,7 +10,7 @@
 - [ ] task2
 
 <!-- Plugin description -->
-IDEA helper<br>
+liaoxy helper<br>
 This plug-in integrates various customized functions<br>
 At present, it has achieved the following goals:<br>
 【Git commit template】<br>
