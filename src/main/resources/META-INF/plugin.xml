@@ -1,11 +1,20 @@
 <idea-plugin>
     <id>cn.liaoxy.plugins</id>
-    <name>liaoxy-idea-helper</name>
+    <name>liaoxy-helper</name>
     <vendor email="liaoxiangyun520@outlook.com" url="https://github.com/liaoxiangyun/liaoxy-idea-helper">liaoxy</vendor>
 
     <description><![CDATA[
-        <h3>idea helper</h3>
-        <p><a href="https://github.com/liaoxiangyun/liaoxy-idea-helper">https://github.com/liaoxiangyun/liaoxy-idea-helper</a></p>
+        <h3><a href="https://github.com/liaoxiangyun/liaoxy-idea-helper">liaoxy helper</a></h3>
+        <p>
+        This plug-in integrates various customized functions<br>
+      At present, it has achieved the following goals:<br>
+      【Git commit template】<br>
+      This plugin allows to create a commit message with the following template:<br>
+      【label1】: describe<br>
+      【label2】: describe<br>
+      ...<br>
+      Various functions will be updated later ...  <br>
+      </p>
         ]]></description>
 
     <!-- Product and plugin compatibility requirements -->

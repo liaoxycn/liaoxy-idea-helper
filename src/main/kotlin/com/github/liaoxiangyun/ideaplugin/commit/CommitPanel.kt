@@ -4,7 +4,6 @@ import com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState
 import com.github.liaoxiangyun.ideaplugin.commit.util.HttpHelper
 import com.github.liaoxiangyun.ideaplugin.commit.util.Util
 import com.intellij.openapi.project.Project
-import com.intellij.util.containers.map2Array
 import java.awt.event.ActionEvent
 import java.awt.event.ItemEvent
 import java.io.File
@@ -291,7 +290,7 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
         var list: ArrayList<String> = arrayListOf()
         list.add(selectedItem as String)
         list.addAll(array)
-        val cbm: ComboBoxModel<String> = DefaultComboBoxModel(list.map2Array { s -> s })
+        val cbm: ComboBoxModel<String> = DefaultComboBoxModel(list.toTypedArray())
         jComboBox?.model = cbm
         jComboBox?.selectedItem = selectedItem
     }
