@@ -18,7 +18,7 @@ package com.github.liaoxiangyun.ideaplugin.commit.vcs
 import com.alibaba.p3c.idea.inspection.AliBaseInspection
 import com.github.liaoxiangyun.ideaplugin.commit.CommitMessage
 import com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState
-import com.github.liaoxiangyun.ideaplugin.common.util.BalloonNotifications
+import com.github.liaoxiangyun.ideaplugin.common.util.Notify
 import com.github.liaoxiangyun.ideaplugin.compatible.inspection.Inspections
 import com.intellij.codeInspection.InspectionManager
 import com.intellij.codeInspection.LocalInspectionTool
@@ -104,9 +104,9 @@ class AliCodeAnalysisCheckinHandler(
     override fun beforeCheckin(
             executor: CommitExecutor?,
             additionalDataConsumer: PairConsumer<Any, Any>
-    ): CheckinHandler.ReturnResult {
+    ): ReturnResult {
         if (!getSettings().analysisBeforeCheckin) {
-            return CheckinHandler.ReturnResult.COMMIT
+            return ReturnResult.COMMIT
         }
         if (DumbService.getInstance(myProject).isDumb) {
             if (Messages.showOkCancelDialog(
@@ -115,9 +115,9 @@ class AliCodeAnalysisCheckinHandler(
                             waitingText, commitText, null
                     ) == Messages.OK
             ) {
-                return CheckinHandler.ReturnResult.CANCEL
+                return ReturnResult.CANCEL
             }
-            return CheckinHandler.ReturnResult.COMMIT
+            return ReturnResult.COMMIT
         }
 
         println(myCheckinPanel.commitMessage)
@@ -127,21 +127,25 @@ class AliCodeAnalysisCheckinHandler(
         val hasViolation = verify != ""
 //        val hasViolation = hasViolation(virtualFiles, myProject)
         if (!hasViolation) {
-            BalloonNotifications.showSuccessNotification(
-                    "No suspicious code found！",
-                    myProject, "Analyze Finished"
-            )
-            return CheckinHandler.ReturnResult.COMMIT
+            try {
+                Notify.showSuccessNotification(
+                        "No suspicious code found！",
+                        myProject, "Analyze Finished"
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            return ReturnResult.COMMIT
         }
         if (Messages.showOkCancelDialog(
                         myProject, "$verify, 是否继续提交？",
                         dialogTitle, commitText, cancelText, null
                 ) == Messages.OK
         ) {
-            return CheckinHandler.ReturnResult.COMMIT
+            return ReturnResult.COMMIT
         } else {
 //            doAnalysis(myProject, virtualFiles.toTypedArray())
-            return CheckinHandler.ReturnResult.CANCEL
+            return ReturnResult.CANCEL
         }
     }
 //
