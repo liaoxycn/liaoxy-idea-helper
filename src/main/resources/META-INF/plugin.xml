@@ -43,7 +43,7 @@
         <action id="HelloWorld" class="com.github.liaoxiangyun.ideaplugin.actions.HelloWorld" text="Say Hello!">
             <add-to-group group-id="WindowMenu" anchor="first"/>
         </action>
-        <action id="Commit.Button" class="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction"
+        <action id="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction" class="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction"
                 text="创建提交模板"
                 description="创建提交模板"
                 icon="/icons/load.png">
