@@ -1,11 +1,13 @@
 package com.github.liaoxiangyun.ideaplugin.coderaminder.util
 
+import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant
 import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant.Companion.PATTERN_M
 import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant.Companion.sdf
 import com.github.liaoxiangyun.ideaplugin.coderaminder.model.GitRecord
 import com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsState
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.intellij.ui.SystemNotifications
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -137,7 +139,7 @@ class HttpHelper {
         for (item in items) {
             getItem(document)?.let { arr.add(it) }
         }
-        //arr.add(GitRecord(sdf.parse("2021-07-09 18:00:00"), "lxy", "project", "develop"))
+//        arr.add(GitRecord(sdf.parse("2021-07-09 18:00:00"), "lxy", "project", "develop"))
 
         if (arr.size > 0) {
             val gitRecord = arr[0]
@@ -145,15 +147,11 @@ class HttpHelper {
             //现在距上一次提交时间差
             val js = CalendarUtil.js(gitRecord.datetime, now)
 
-            val msg = "最近一次提交是: ${sdf.format(gitRecord.datetime)}, 已经${js}天未提交了"
+            val msg = "最近一次提交是: ${sdf.format(gitRecord.datetime)}, 你已经${js}天未提交代码了, 请尽快提交代码！"
             if (js >= days) {
-                if ((now.time - lastTime) > (1000 * 60 * 30)) {
-                    lastTime = now.time
-                    throw RuntimeException(msg)
-                } else {
-                    throw RuntimeException(msg)
-                    println("lastTime le (1000 * 60 * 60)")
-                }
+                SystemNotifications.getInstance().notify("${Constant.setttingName}",
+                        "你已经${js}天未提交代码了", msg)
+                throw RuntimeException(msg)
             } else {
                 println(msg)
             }

@@ -6,7 +6,7 @@ import java.util.regex.Pattern
 
 class Constant {
     companion object {
-        open val setttingName: String = "福报提醒"
+        open val setttingName: String = "代码提交提醒"
         open val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         open var projects = arrayListOf<Project>()
         open val PATTERN_M = Pattern.compile("^\\d\\d:\\d\\d$")

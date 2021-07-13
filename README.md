@@ -7,7 +7,7 @@
 ## Todo List
 
 - [x] Git commit template
-- [ ] task2
+- [x] Code submission reminder
 
 <!-- Plugin description -->
 liaoxy helper<br>
@@ -42,12 +42,5 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 
 ## Usage
 
-![Commit-step1](src/main/resources/imgs/1.jpg)
-
-![Commit-step2](src/main/resources/imgs/2.jpg)
-
-![Commit-step3](src/main/resources/imgs/3.jpg)
-
-![Commit-step4](src/main/resources/imgs/4.jpg)
-
-![Commit-step5](src/main/resources/imgs/5.jpg)
+  ![git-commit-template](help/git-commit-template/help.md)
+  ![code-submission-reminder](help/code-submission-reminder/help.md)

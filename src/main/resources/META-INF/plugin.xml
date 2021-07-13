@@ -40,7 +40,7 @@
         <applicationConfigurable parentId="liaoxy-helper"
                                  instance="com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsConfigurable"
                                  id="com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsConfigurable"
-                                 displayName="福报提醒"/>
+                                 displayName="代码提交提醒"/>
 
         <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.coderaminder.services.ProjectOpened"/>
     </extensions>

@@ -23,7 +23,7 @@ class CodeSettingsState : PersistentStateComponent<CodeSettingsState> {
     /**
      * 间隔天数
      */
-    var days = "2"
+    var days = "1"
 
     /**
      * 时间

@@ -7,6 +7,7 @@ import com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsStat
 import com.github.liaoxiangyun.ideaplugin.coderaminder.util.HttpHelper
 import com.github.liaoxiangyun.ideaplugin.common.util.Notify
 import com.intellij.openapi.project.Project
+import com.intellij.ui.SystemNotifications
 
 class ProjectOpened(project: Project) {
 
@@ -37,11 +38,10 @@ class ProjectOpened(project: Project) {
             val gitRecords = HttpHelper().getGitRecordList()
             println(gitRecords)
         } catch (e: Exception) {
-            e.printStackTrace()
             try {
                 Notify.showErrorNotification(
                         "" + e.message,
-                        Constant.getAnyProject(), "${Constant.setttingName}："
+                        Constant.getAnyProject(), "${Constant.setttingName}：", 3
                 )
             } catch (e: Exception) {
             }
