@@ -13,17 +13,27 @@ import java.net.UnknownHostException
 
 class Notify {
     companion object {
-        private var TITLE: String = "SmartFox Intellij IDEA Plugin";
-        private val sticky: NotificationGroup = NotificationGroup("SmartFox Intellij IDEA Notification",
-                NotificationDisplayType.STICKY_BALLOON, true)
-        private val ball: NotificationGroup = NotificationGroup("SmartFox Intellij IDEA Balloon Notification",
+        private var TITLE: String = "Intellij IDEA Plugin";
+        private val none: NotificationGroup = NotificationGroup("Intellij IDEA NONE Notification",
+                NotificationDisplayType.NONE, true)
+        private val ball: NotificationGroup = NotificationGroup("Intellij IDEA Balloon Notification",
                 NotificationDisplayType.BALLOON, true)
+        private val sticky: NotificationGroup = NotificationGroup("Intellij IDEA Notification",
+                NotificationDisplayType.STICKY_BALLOON, true)
+        private val window: NotificationGroup = NotificationGroup("Intellij IDEA Window Notification",
+                NotificationDisplayType.TOOL_WINDOW, true, "Intellij IDEA Window Notification")
 
         private fun showNotification(message: String, project: Project? = ProjectManager.getInstance().defaultProject,
                                      title: String = TITLE,
                                      notificationType: NotificationType = NotificationType.INFORMATION,
-                                     notificationListener: NotificationListener? = null, sticky: Boolean = false) {
-            val group = if (sticky) this.sticky else ball
+                                     notificationListener: NotificationListener? = null, level: Int = 2) {
+            var group = sticky
+            when (level) {
+                0 -> { group = none }
+                1 -> { group = ball }
+                2 -> { group = sticky }
+                3 -> { group = window }
+            }
             group.createNotification(title, message, notificationType, notificationListener).notify(project)
         }
 
@@ -42,24 +52,24 @@ class Notify {
             Messages.showErrorDialog(component, getErrorTextFromException(e), title)
         }
 
-        fun showSuccessNotification(message: String, project: Project? = ProjectManager.getInstance().defaultProject,
-                                    title: String = TITLE, sticky: Boolean = false) {
-            showNotification(message, project, title, NotificationType.INFORMATION, null, sticky)
+        open fun showSuccessNotification(message: String, project: Project? = ProjectManager.getInstance().defaultProject,
+                                         title: String = TITLE, level: Int = 2) {
+            showNotification(message, project, title, NotificationType.INFORMATION, null, level)
         }
 
         fun showWarnNotification(message: String, project: Project? = ProjectManager.getInstance().defaultProject,
-                                 title: String = TITLE, sticky: Boolean = false) {
-            showNotification(message, project, title, NotificationType.WARNING, null, sticky)
+                                 title: String = TITLE, level: Int = 2) {
+            showNotification(message, project, title, NotificationType.WARNING, null, level)
         }
 
         fun showErrorNotification(message: String, project: Project? = ProjectManager.getInstance().defaultProject,
-                                  title: String = TITLE, sticky: Boolean = false) {
-            showNotification(message, project, title, NotificationType.ERROR, null, sticky)
+                                  title: String = TITLE, level: Int = 2) {
+            showNotification(message, project, title, NotificationType.ERROR, null, level)
         }
 
         fun showSuccessNotification(message: String, project: Project?,
-                                    notificationListener: NotificationListener, title: String = TITLE, sticky: Boolean = false) {
-            showNotification(message, project, title, NotificationType.INFORMATION, notificationListener, sticky)
+                                    notificationListener: NotificationListener, title: String = TITLE, level: Int = 2) {
+            showNotification(message, project, title, NotificationType.INFORMATION, notificationListener, level)
         }
 
         private fun isOperationCanceled(e: Exception): Boolean {

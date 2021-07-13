@@ -1,9 +1,12 @@
 package com.github.liaoxiangyun.ideaplugin.commit
 
+import com.github.liaoxiangyun.ideaplugin.commit.constant.Constant
 import com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState
 import com.github.liaoxiangyun.ideaplugin.commit.util.HttpHelper
 import com.github.liaoxiangyun.ideaplugin.commit.util.Util
+import com.github.liaoxiangyun.ideaplugin.common.util.Notify
 import com.intellij.openapi.project.Project
+import java.awt.Container
 import java.awt.event.ActionEvent
 import java.awt.event.ItemEvent
 import java.io.File
@@ -20,6 +23,7 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
     var settings: AppSettingsState = AppSettingsState.getConfig()
 
     var mainPanel: JPanel? = null
+    var changTypeJPanel: JPanel? = null
     var label21: JLabel? = null
     var shortDescription: JTextField? = null
     var label22: JLabel? = null
@@ -42,6 +46,8 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
     var type6Rb: JRadioButton? = null
     var type7Rb: JRadioButton? = null
     var type8Rb: JRadioButton? = null
+    var type9Rb: JRadioButton? = null
+    var type10Rb: JRadioButton? = null
 
     //row2
     // 【任务描述】：人机定位管理优化（必填）
@@ -184,7 +190,10 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
     }
 
 
+    private var project: Project? = null
+
     init {
+        this.project = project
         lList = arrayOf(t1, t2, t3, t4, t5)
         val workingDirectory = File(project?.basePath)
         val result = GitLogQuery(workingDirectory).execute()
@@ -296,24 +305,32 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
     }
 
     private fun loadTaskID(e: ActionEvent, name: String) {
-        when (name) {
-            "任务ID" -> {
-                val dataList = HttpHelper().getTaskList()
-                var list = dataList.map { tr -> "任务#${tr[0]} ${tr[3]}" }
-                settings.taskList = list as ArrayList<String>
-                setDefItem(changeScope, list)
+        try {
+            when (name) {
+                "任务ID" -> {
+                    val dataList = HttpHelper().getTaskList()
+                    var list = dataList.map { tr -> "任务#${tr[0]} ${tr[3]}" }
+                    settings.taskList = list as ArrayList<String>
+                    setDefItem(changeScope, list)
+                }
+                "BugID" -> {
+                    val dataList = HttpHelper().getBugList()
+                    val list = dataList.map { tr -> "Bug#${tr[0]} 【${tr[3]}】 ${tr[4]}" }
+                    settings.bugList = list as ArrayList<String>
+                    setDefItem(comboBox1, list)
+                }
+                "需求ID" -> {
+                    val dataList = HttpHelper().getStoryList()
+                    val list = dataList.map { tr -> "需求#${tr[0]} ${tr[3]}" }
+                    settings.storyList = list as ArrayList<String>
+                    setDefItem(comboBox2, list)
+                }
             }
-            "BugID" -> {
-                val dataList = HttpHelper().getBugList()
-                val list = dataList.map { tr -> "Bug#${tr[0]} 【${tr[3]}】 ${tr[4]}" }
-                settings.bugList = list as ArrayList<String>
-                setDefItem(comboBox1, list)
-            }
-            "需求ID" -> {
-                val dataList = HttpHelper().getStoryList()
-                val list = dataList.map { tr -> "需求#${tr[0]} ${tr[3]}" }
-                settings.storyList = list as ArrayList<String>
-                setDefItem(comboBox2, list)
+        } catch (e: Exception) {
+            try {
+                Notify.showErrorNotification("获取失败，请检查地址或Cookie" + e.message, project
+                        ?: null, "${Constant.commitName}：")
+            } catch (e: Exception) {
             }
         }
     }
@@ -391,6 +408,18 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
                 return arrayListOf(
                         label5, textField7,
                         label6, textField3,
+                )
+            }
+            ChangeType.TYPE9 -> {
+                return arrayListOf(
+                        label3, changeScope, button1,
+                        label17, textField15,
+                )
+            }
+            ChangeType.TYPE10 -> {
+                return arrayListOf(
+                        label3, changeScope, button1,
+                        label17, textField15,
                 )
             }
         }
