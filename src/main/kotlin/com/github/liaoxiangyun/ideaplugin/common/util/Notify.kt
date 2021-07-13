@@ -42,7 +42,7 @@ class Notify {
             Messages.showErrorDialog(component, getErrorTextFromException(e), title)
         }
 
-        fun showSuccessNotification(message: String, project: Project? = ProjectManager.getInstance().defaultProject,
+        open fun showSuccessNotification(message: String, project: Project? = ProjectManager.getInstance().defaultProject,
                                     title: String = TITLE, sticky: Boolean = false) {
             showNotification(message, project, title, NotificationType.INFORMATION, null, sticky)
         }
