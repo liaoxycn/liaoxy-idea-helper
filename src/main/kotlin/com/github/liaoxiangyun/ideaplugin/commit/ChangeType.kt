@@ -84,11 +84,27 @@ enum class ChangeType(private val title: String, private val description: String
             CommitLine("备注", true, null, "CI统计时默认排除。"))),
 
     /**
+     * 第三方开源代码引入
+     */
+    TYPE9("第三方开源代码引入", "第三方开源代码引入", arrayListOf(
+            CommitLine("任务ID", true, null, "ccccc", "ccccc"),
+            CommitLine("备注", true, null, "CI统计时默认排除。"))),
+
+    /**
+     * 第三方开源代码引入
+     */
+    TYPE10("resource目录下的脚本和资源文件初始化或修改", "resource目录下的脚本和资源文件初始化或修改", arrayListOf(
+            CommitLine("任务ID", true, null, "ddddd", "ddddd"),
+            CommitLine("备注", true, null, "CI统计时默认排除。"))),
+
+    /**
      * 其它
      */
     TYPE8("其它", "其它", arrayListOf(
             CommitLine("修改描述", true, null),
-            CommitLine("影响范围", true, null)));
+            CommitLine("影响范围", true, null))),
+
+    ;
 
     fun label(): String {
         return name.toLowerCase()
