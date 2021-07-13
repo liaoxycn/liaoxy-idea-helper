@@ -2,7 +2,7 @@
 
 ### Usage
 
-![Commit-step1](imgs/1.jpg)
+![Commit-step1](imgs/1.png)
 
 ![Commit-step1](imgs/2.jpg)
 
