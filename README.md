@@ -42,5 +42,6 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 
 ## Usage
 
-  ![git-commit-template](help/git-commit-template/help.md)
-  ![code-submission-reminder](help/code-submission-reminder/help.md)
+  [git-commit-template](help/git-commit-template/help.md)
+
+  [code-submission-reminder](help/code-submission-reminder/help.md)
