@@ -35,15 +35,15 @@ class CodeSettingsState : PersistentStateComponent<CodeSettingsState> {
      */
     var rateStr = "10"
 
-    open fun getRate(): Long {
+    open fun getRate(): Int {
         try {
             val valueOf = Integer.valueOf(rateStr)
             if (valueOf > 0) {
-                return (valueOf * 1000 * 60).toLong()
+                return (valueOf * 1000 * 60)
             }
         } catch (e: Exception) {
         }
-        return (1 * 1000 * 60).toLong()
+        return (1 * 1000 * 60)
     }
 
 

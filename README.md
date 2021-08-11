@@ -8,6 +8,7 @@
 
 - [x] Git commit template
 - [x] Code submission reminder
+- [x] react umi dispatch
 
 <!-- Plugin description -->
 liaoxy helper<br>
