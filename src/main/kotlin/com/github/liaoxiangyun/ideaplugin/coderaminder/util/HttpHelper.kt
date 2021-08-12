@@ -46,7 +46,7 @@ class HttpHelper {
         }
         origin = settings.origin
         session = settings.session
-        val time = settings.reTimeStr ?: "-"
+        val time = settings.reTimeStr
         val split = time.split("-").filter { PATTERN_M.matcher(it).matches() }.map {
             val split = it.split(":")
             listOf(Integer.valueOf(split[0]), Integer.valueOf(split[1]))
@@ -103,7 +103,7 @@ class HttpHelper {
         return gitRecord
     }
 
-    open fun getGitRecordList(): ArrayList<GitRecord> {
+    fun getGitRecordList(): ArrayList<GitRecord> {
         var arr: ArrayList<GitRecord> = arrayListOf()
 
         val now = Date()

@@ -25,7 +25,7 @@ class JsSettingComponent {
             jButton.isEnabled = false
 
             val jsService = JsService.getInstance(ProjectUtils.currProject)
-            val msg = jsService.loadIndex()
+            val msg = jsService.loadModelsIndex()
 
             jButton.isEnabled = true
             jbLabel.text = msg

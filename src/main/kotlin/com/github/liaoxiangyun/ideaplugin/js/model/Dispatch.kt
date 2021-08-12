@@ -17,9 +17,9 @@ class Dispatch(typePsi: PsiElement, type: String?) {
     init {
         var type = type
         this.typePsi = typePsi
-        this.type = type
         if (type != null && StringUtilRt.isQuotedString(type) && type.contains("/")) {
             type = StringUtilRt.unquoteString(type)
+            this.type = type
             val split = type.split("/".toRegex()).toTypedArray()
             if (split.size > 1) {
                 namespace = split[0]

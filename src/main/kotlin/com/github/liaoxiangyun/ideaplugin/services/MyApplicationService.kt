@@ -8,45 +8,45 @@ import com.github.liaoxiangyun.ideaplugin.common.util.ProjectUtils
 import com.github.liaoxiangyun.ideaplugin.js.service.JsService
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.ServiceManager
-import com.intellij.openapi.wm.IdeFrame
-import com.intellij.openapi.wm.WindowManager
-import com.intellij.openapi.wm.WindowManagerListener
 import com.intellij.util.concurrency.AppExecutorUtil
+import java.io.Closeable
+import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
 
-class MyApplicationService {
+class MyApplicationService : Closeable {
+    private var schedule: ScheduledFuture<*>? = null
 
     init {
-        val wm = WindowManager.getInstance()
-        wm.addListener(object : WindowManagerListener {
-            override fun frameCreated(frame: IdeFrame) {
-                println("#WindowManagerListener frameCreated = $frame")
-            }
+        println("【MyApplicationService,,】 init")
+        execTask()
+    }
 
-            override fun beforeFrameReleased(frame: IdeFrame) {
-                println("#WindowManagerListener beforeFrameReleased = $frame")
-            }
-        })
-        println("MyApplicationService}")
-        AppExecutorUtil.getAppScheduledExecutorService().schedule({
+    private fun execTask() {
+        println("#MyApplicationService execTask")
+        schedule = AppExecutorUtil.getAppScheduledExecutorService().schedule({
             codingReminderTask()
             jsTask()
         }, 1, TimeUnit.MINUTES)
     }
 
-    open fun jsTask() {
+    override fun close() {
+        val cancel = schedule?.cancel(true)
+        println("#MyApplicationService close=$cancel")
+    }
+
+    private fun jsTask() {
         c0--
         if (c0 > 0) {
             return
         }
         ApplicationManager.getApplication().runReadAction {
-            JsService.getInstance(ProjectUtils.currProject).loadIndex()
+            JsService.getInstance(ProjectUtils.currProject).loadModelsIndex()
         }
         c0 = 10
     }
 
-    open fun codingReminderTask() {
+    private fun codingReminderTask() {
         try {
             c1--
             if (c1 > 0) {

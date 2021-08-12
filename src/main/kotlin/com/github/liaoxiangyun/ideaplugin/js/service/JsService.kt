@@ -1,5 +1,6 @@
 package com.github.liaoxiangyun.ideaplugin.js.service
 
+import com.github.liaoxiangyun.ideaplugin.js.model.Dispatch
 import com.intellij.lang.ecmascript6.psi.ES6ExportDefaultAssignment
 import com.intellij.lang.javascript.psi.JSFile
 import com.intellij.lang.javascript.psi.JSObjectLiteralExpression
@@ -14,48 +15,74 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 
 class JsService(private val project: Project) {
-    private val map: MutableMap<String, JSFile> = mutableMapOf()
+    //是否umi项目
+    private var isUmi: Boolean = false
+    private val modelsMap: MutableMap<String, JSFile> = mutableMapOf()
+    private val dispatchMap: MutableMap<String, MutableSet<PsiElement>> = mutableMapOf()
 
     init {
-        loadIndex()
+        println("============================================================")
+        println("【${project.name}】 #JsService init ")
+        loadModelsIndex()
+    }
+
+    fun addDispatch(dispatch: Dispatch) {
+        if (dispatch.valid) {
+            var list = dispatchMap[dispatch.type!!]
+            if (list == null) {
+                list = mutableSetOf()
+            }
+            list.add(dispatch.typePsi)
+            dispatchMap[dispatch.type!!] = list
+        }
     }
 
     fun getJSFile(namespace: String): JSFile? {
-        return map[namespace]
+        return modelsMap[namespace]
     }
 
-    fun searchModels(dir: PsiDirectory) {
+    private fun searchModelsDir(dir: PsiDirectory) {
         for (child in dir.subdirectories) {
             if (child.name == models) {
-                //
-                searchModelJs(child)
-            } else {
-                searchModels(child)
+                println("#Dir  P:${dir.name}  T:y  C:${child.name}")
+                searchModelJSFile(child)
+            } else if (!child.name.startsWith(".")) {
+                println("#Dir  P:${dir.name}  T:n  C:${child.name}")
+                searchModelsDir(child)
             }
         }
     }
 
-    fun searchModelJs(dir: PsiDirectory) {
+    private fun searchModelJSFile(dir: PsiDirectory) {
         for (child in dir.children) {
             if (child is PsiDirectory) {
-                searchModelJs(child)
+                println("#JSFile  P:${dir.name}  T:dir  C:${child.name}")
+                searchModelJSFile(child)
             } else if (child is JSFile) {
-                isModelJs(child)
+                println("#JSFile  P:${dir.name}  T:js   C:${child.name}")
+                addModelJSFile(child)
+            } else {
+                println("#JSFile  P:${dir.name}  T:other   C:${child}")
             }
         }
     }
 
-    private fun isModelJs(jsFile: JSFile) {
+    private fun addModelJSFile(jsFile: JSFile) {
         for (child in jsFile.children) {
             if (child is ES6ExportDefaultAssignment) { //是否 export default
-                if (child.lastChild is JSObjectLiteralExpression) {
-                    val jsObj = child.lastChild as JSObjectLiteralExpression
-                    val namespace = jsObj.findProperty(NAMESPACE) ?: return
-                    val state = jsObj.findProperty(STATE) ?: return
-                    val effects = jsObj.findProperty(EFFECTS) ?: return
-                    val reducers = jsObj.findProperty(REDUCERS) ?: return
-                    namespace.value?.text?.let {
-                        map[StringUtilRt.unquoteString(it)] = jsFile
+                for (child in child.children) {
+                    if (child is JSObjectLiteralExpression) {
+                        val jsObj = child
+                        val namespace = jsObj.findProperty(NAMESPACE) ?: return
+                        jsObj.findProperty(STATE) ?: return
+                        jsObj.findProperty(EFFECTS) ?: return
+                        jsObj.findProperty(REDUCERS) ?: return
+                        val text = namespace.value?.text
+                        if (text != null) {
+                            modelsMap[StringUtilRt.unquoteString(text)] = jsFile
+                            println("#Find models namespace=$text jsFile=$jsFile")
+                            continue
+                        }
                     }
                 }
             }
@@ -66,20 +93,22 @@ class JsService(private val project: Project) {
         if (jsFile == null) return null
         for (child in jsFile.children) {
             if (child is ES6ExportDefaultAssignment) { //是否 export default
-                if (child.lastChild is JSObjectLiteralExpression) {
-                    val jsObj = child.lastChild as JSObjectLiteralExpression
-                    val effects = jsObj.findProperty(EFFECTS) ?: return null
-                    val reducers = jsObj.findProperty(REDUCERS) ?: return null
-                    if (effects.value is JSObjectLiteralExpressionImpl) {
-                        val findProperty = (effects.value as JSObjectLiteralExpressionImpl).findProperty(func)
-                        if (findProperty != null) {
-                            return findProperty
+                for (child in child.children) {
+                    if (child is JSObjectLiteralExpression) {
+                        val jsObj = child
+                        val effects = jsObj.findProperty(EFFECTS) ?: return null
+                        val reducers = jsObj.findProperty(REDUCERS) ?: return null
+                        if (effects.value is JSObjectLiteralExpressionImpl) {
+                            val findProperty = (effects.value as JSObjectLiteralExpressionImpl).findProperty(func)
+                            if (findProperty != null) {
+                                return findProperty
+                            }
                         }
-                    }
-                    if (reducers.value is JSObjectLiteralExpressionImpl) {
-                        val findProperty = (reducers.value as JSObjectLiteralExpressionImpl).findProperty(func)
-                        if (findProperty != null) {
-                            return findProperty
+                        if (reducers.value is JSObjectLiteralExpressionImpl) {
+                            val findProperty = (reducers.value as JSObjectLiteralExpressionImpl).findProperty(func)
+                            if (findProperty != null) {
+                                return findProperty
+                            }
                         }
                     }
                 }
@@ -88,26 +117,30 @@ class JsService(private val project: Project) {
         return null
     }
 
-    fun loadIndex(): String {
+    fun loadModelsIndex(): String {
         val s = System.currentTimeMillis();
         val dumb = DumbService.getInstance(project).isDumb
         println("#loadIndex project=${project.name} dumb=$dumb")
         if (!dumb) {
             val virtualFile = project.guessProjectDir()
-            val directory = PsiManager.getInstance(project).findDirectory(virtualFile!!)
-            val src = directory!!.findSubdirectory(src)
-            val models = src!!.findSubdirectory(models)
+            val directory = PsiManager.getInstance(project).findDirectory(virtualFile!!) ?: return ""
+            val src = directory.findSubdirectory(src) ?: return ""
+            directory.findFile(umirc) ?: return ""
+            isUmi = true
+
+            val models = src.findSubdirectory(models)
             if (models != null) {
-                searchModelJs(models)
+                searchModelJSFile(models)
             }
             val pages = src.findSubdirectory(pages)
             if (pages != null) {
-                searchModels(pages)
+                searchModelsDir(pages)
             }
         }
         val l = System.currentTimeMillis() - s
-        val msg = "找到${this.map.keys.size}个model，共耗时${l}ms"
-        println(msg)
+        val msg = "找到${this.modelsMap.keys.size}个model，共耗时${l}ms"
+        println("【loadIndex】 $msg")
+        println(this.modelsMap)
         return msg
     }
 
@@ -119,6 +152,7 @@ class JsService(private val project: Project) {
         private const val models: String = "models"
         private const val pages: String = "pages"
         private const val src: String = "src"
+        private const val umirc: String = ".umirc.js"
 
         open fun getInstance(project: Project): JsService {
             return ServiceManager.getService(project, JsService::class.java)

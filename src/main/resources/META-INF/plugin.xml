@@ -50,7 +50,6 @@
                                  id="com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsConfigurable"
                                  displayName="代码提交提醒"/>
 
-        <applicationInitializedListener implementation="com.github.liaoxiangyun.ideaplugin.listeners.MyApplicationManagerListener"/>
         <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.ProjectOpened"/>
         <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.js.service.JsService"/>
 
@@ -63,9 +62,7 @@
         <listener class="com.github.liaoxiangyun.ideaplugin.listeners.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
         <listener class="com.github.liaoxiangyun.ideaplugin.listeners.MyApplicationManagerListener"
-                  topic="com.intellij.ide.ApplicationLoadListener"/>
-        <listener class="com.github.liaoxiangyun.ideaplugin.listeners.MyApplicationManagerListener"
-                  topic="com.intellij.ide.ApplicationInitializedListener"/>
+                  topic="com.intellij.ide.AppLifecycleListener"/>
     </applicationListeners>
     <actions>
         <action id="HelloWorld" class="com.github.liaoxiangyun.ideaplugin.actions.HelloWorld" text="Say Hello!">

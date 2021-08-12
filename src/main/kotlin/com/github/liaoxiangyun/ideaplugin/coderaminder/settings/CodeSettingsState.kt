@@ -35,7 +35,7 @@ class CodeSettingsState : PersistentStateComponent<CodeSettingsState> {
      */
     var rateStr = "10"
 
-    open fun getRate(): Int {
+    fun getRate(): Int {
         try {
             val valueOf = Integer.valueOf(rateStr)
             if (valueOf > 0) {
