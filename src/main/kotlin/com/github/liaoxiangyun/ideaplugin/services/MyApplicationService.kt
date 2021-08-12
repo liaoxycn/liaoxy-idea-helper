@@ -69,8 +69,8 @@ class MyApplicationService {
 
 
     companion object {
-        var c0: Int = 0
-        var c1: Int = 0
+        var c0: Int = 10
+        var c1: Int = 10
 
         val instance: MyApplicationService
             get() = ServiceManager.getService(MyApplicationService::class.java)
