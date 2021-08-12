@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit
 class MyApplicationService {
 
     init {
-
         val wm = WindowManager.getInstance()
         wm.addListener(object : WindowManagerListener {
             override fun frameCreated(frame: IdeFrame) {
@@ -33,7 +32,7 @@ class MyApplicationService {
         AppExecutorUtil.getAppScheduledExecutorService().schedule({
             codingReminderTask()
             jsTask()
-        }, 1, TimeUnit.SECONDS)
+        }, 1, TimeUnit.MINUTES)
     }
 
     open fun jsTask() {
