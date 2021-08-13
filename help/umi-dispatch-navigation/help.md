@@ -1,4 +1,4 @@
-# git-commit-template
+# umi-dispatch-navigation
 
 ### Usage
 
