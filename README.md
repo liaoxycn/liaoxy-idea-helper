@@ -6,8 +6,9 @@
 
 ## Todo List
 
-- [x] Git commit template
-- [x] Code submission reminder
+- [x] Git commit template （Git 提交模板）
+- [x] Code submission reminder （代码提交提醒）
+- [x] React umi dispatch navigation （umi dispatch 导航）
 
 <!-- Plugin description -->
 liaoxy helper<br>
@@ -45,3 +46,5 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
   [git-commit-template](help/git-commit-template/help.md)
 
   [code-submission-reminder](help/code-submission-reminder/help.md)
+
+  [umi-dispatch-navigation](help/umi-dispatch-navigation/help.md)

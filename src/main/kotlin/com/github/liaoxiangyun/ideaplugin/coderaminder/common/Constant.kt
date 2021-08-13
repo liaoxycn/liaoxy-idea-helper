@@ -6,16 +6,9 @@ import java.util.regex.Pattern
 
 class Constant {
     companion object {
-        open val setttingName: String = "代码提交提醒"
-        open val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        open var projects = arrayListOf<Project>()
-        open val PATTERN_M = Pattern.compile("^\\d\\d:\\d\\d$")
+        const val setttingName: String = "代码提交提醒"
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        val PATTERN_M: Pattern = Pattern.compile("^\\d\\d:\\d\\d$")
 
-        open fun getAnyProject(): Project? {
-            if (projects.size > 0) {
-                return projects[0]
-            }
-            return null
-        }
     }
 }

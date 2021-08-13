@@ -23,7 +23,7 @@ class HttpHelper {
     private var origin = "http://gitlab.szewec.com/e.liaoxiangyun"
     private var session = "session"
     private var enableStatus = false
-    private var days = 2
+    private var days = 1
     private var minutes: List<List<Int>> = listOf(listOf())
     private var taskUrl = "?limit=20&offset=0"
 
@@ -37,15 +37,16 @@ class HttpHelper {
         val settings = CodeSettingsState.instance
         println(settings.toString())
         try {
-            days = Integer.valueOf(settings.days) ?: 2
+            days = Integer.valueOf(settings.days) ?: 1
             if (days <= 0) {
-                days = 1
+                days = 0
             }
         } catch (e: Exception) {
+            days = 1
         }
         origin = settings.origin
         session = settings.session
-        val time = settings.reTimeStr ?: "-"
+        val time = settings.reTimeStr
         val split = time.split("-").filter { PATTERN_M.matcher(it).matches() }.map {
             val split = it.split(":")
             listOf(Integer.valueOf(split[0]), Integer.valueOf(split[1]))
@@ -102,7 +103,7 @@ class HttpHelper {
         return gitRecord
     }
 
-    open fun getGitRecordList(): ArrayList<GitRecord> {
+    fun getGitRecordList(): ArrayList<GitRecord> {
         var arr: ArrayList<GitRecord> = arrayListOf()
 
         val now = Date()

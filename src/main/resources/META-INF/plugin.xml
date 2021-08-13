@@ -20,19 +20,27 @@
     <!-- Product and plugin compatibility requirements -->
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>JavaScript</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <checkinHandlerFactory
                 implementation="com.github.liaoxiangyun.ideaplugin.commit.vcs.AliCodeAnalysisCheckinHandlerFactory"
                 order="first"/>
+        <applicationService serviceImplementation="com.github.liaoxiangyun.ideaplugin.services.MyApplicationService"/>
         <applicationService
                 serviceImplementation="com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState"/>
         <applicationService
                 serviceImplementation="com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsState"/>
+        <applicationService
+                serviceImplementation="com.github.liaoxiangyun.ideaplugin.js.setting.JsSettingsState"/>
         <applicationConfigurable parentId=""
-                                 instance="com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsConfigurable"
+                                 instance="com.github.liaoxiangyun.ideaplugin.setting.MainSettingsConfigurable"
                                  id="liaoxy-helper"
                                  displayName="IDEA助手"/>
+        <applicationConfigurable parentId="liaoxy-helper"
+                                 instance="com.github.liaoxiangyun.ideaplugin.js.setting.JsSettingsConfigurable"
+                                 id="JavaScript"
+                                 displayName="JavaScript"/>
         <applicationConfigurable parentId="liaoxy-helper"
                                  instance="com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsConfigurable"
                                  id="com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsConfigurable"
@@ -42,18 +50,26 @@
                                  id="com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsConfigurable"
                                  displayName="代码提交提醒"/>
 
-        <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.coderaminder.services.ProjectOpened"/>
+        <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.ProjectOpened"/>
+        <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.js.service.JsService"/>
+
+        <!--实现跳转的lineMarkerProvider-->
+        <codeInsight.lineMarkerProvider language="JavaScript"
+                                        implementationClass="com.github.liaoxiangyun.ideaplugin.js.service.DispatchLineMarkerProvider"/>
     </extensions>
 
     <applicationListeners>
         <listener class="com.github.liaoxiangyun.ideaplugin.listeners.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
+        <listener class="com.github.liaoxiangyun.ideaplugin.listeners.MyApplicationManagerListener"
+                  topic="com.intellij.ide.AppLifecycleListener"/>
     </applicationListeners>
     <actions>
         <action id="HelloWorld" class="com.github.liaoxiangyun.ideaplugin.actions.HelloWorld" text="Say Hello!">
             <add-to-group group-id="WindowMenu" anchor="first"/>
         </action>
-        <action id="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction" class="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction"
+        <action id="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction"
+                class="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction"
                 text="创建提交模板"
                 description="创建提交模板"
                 icon="/icons/load.png">
