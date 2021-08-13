@@ -66,7 +66,7 @@
     </applicationListeners>
     <actions>
         <action id="HelloWorld" class="com.github.liaoxiangyun.ideaplugin.actions.HelloWorld" text="Say Hello!">
-            <add-to-group group-id="WindowMenu" anchor="first"/>
+            <add-to-group group-id="ToolsMenu" anchor="first"/>
         </action>
         <action id="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction"
                 class="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction"
