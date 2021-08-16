@@ -54,6 +54,9 @@ class DispatchLineMarkerProvider : RelatedItemLineMarkerProvider() {
             }
             val argumentList = c2.argumentList ?: return null
             val arguments = argumentList.arguments
+            if (arguments == null || arguments.isEmpty() || arguments[0] !is JSObjectLiteralExpressionImpl) {
+                return null
+            }
             val params = arguments[0] as JSObjectLiteralExpressionImpl
             val type = params.findProperty("type") ?: return null
             val value = type.value ?: return null

@@ -122,7 +122,7 @@ class JsService(private val project: Project) {
         val dumb = DumbService.getInstance(project).isDumb
         println("#loadIndex project=${project.name} dumb=$dumb")
         if (!dumb) {
-            val virtualFile = project.guessProjectDir()
+            val virtualFile = project.guessProjectDir() ?: return ""
             val directory = PsiManager.getInstance(project).findDirectory(virtualFile!!) ?: return ""
             val src = directory.findSubdirectory(src) ?: return ""
             directory.findFile(umirc) ?: return ""
