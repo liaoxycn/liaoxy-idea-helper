@@ -25,9 +25,7 @@ class DispatchLineMarkerProvider : RelatedItemLineMarkerProvider() {
             println("========= dispatch = $dispatch")
             val jsService = JsService.getInstance(element.project)
             val jsFile = jsService.getJSFile(dispatch.namespace) ?: return
-            val s = System.currentTimeMillis()
             val modelsFunc = jsService.getModelsFunc(jsFile, dispatch.function)
-            println("getModelsFunc 耗时${System.currentTimeMillis() - s}")
             //构建导航图标的builder
             val builder = NavigationGutterIconBuilder.create(Icons.down)
                     .setAlignment(GutterIconRenderer.Alignment.CENTER) //target是xmlTag
