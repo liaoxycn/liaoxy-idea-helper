@@ -1,6 +1,6 @@
-package com.github.liaoxiangyun.ideaplugin.js.setting
+package com.github.liaoxiangyun.ideaplugin.javascript.setting
 
-import com.github.liaoxiangyun.ideaplugin.js.service.JsService
+import com.github.liaoxiangyun.ideaplugin.javascript.service.JsService
 import com.github.liaoxiangyun.ideaplugin.common.util.ProjectUtils
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextField

@@ -1,10 +1,12 @@
-package com.github.liaoxiangyun.ideaplugin.js.service
+package com.github.liaoxiangyun.ideaplugin.javascript.service
 
-import com.github.liaoxiangyun.ideaplugin.js.model.Dispatch
+import com.github.liaoxiangyun.ideaplugin.javascript.model.Dispatch
 import com.intellij.lang.ecmascript6.psi.ES6ExportDefaultAssignment
 import com.intellij.lang.javascript.psi.JSFile
+import com.intellij.lang.javascript.psi.JSFunctionProperty
 import com.intellij.lang.javascript.psi.JSObjectLiteralExpression
 import com.intellij.lang.javascript.psi.impl.JSObjectLiteralExpressionImpl
+import com.intellij.lang.javascript.psi.impl.JSPropertyImpl
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
@@ -19,6 +21,7 @@ class JsService(private val project: Project) {
     private var isUmi: Boolean = false
     private val modelsMap: MutableMap<String, JSFile> = mutableMapOf()
     private val dispatchMap: MutableMap<String, MutableSet<PsiElement>> = mutableMapOf()
+    private var time: Long = 0
 
     init {
         println("============================================================")
@@ -91,23 +94,24 @@ class JsService(private val project: Project) {
 
     open fun getModelsFunc(jsFile: JSFile?, func: String): PsiElement? {
         if (jsFile == null) return null
-        for (child in jsFile.children) {
-            if (child is ES6ExportDefaultAssignment) { //是否 export default
-                for (child in child.children) {
-                    if (child is JSObjectLiteralExpression) {
-                        val jsObj = child
-                        val effects = jsObj.findProperty(EFFECTS) ?: return null
-                        val reducers = jsObj.findProperty(REDUCERS) ?: return null
-                        if (effects.value is JSObjectLiteralExpressionImpl) {
-                            val findProperty = (effects.value as JSObjectLiteralExpressionImpl).findProperty(func)
-                            if (findProperty != null) {
-                                return findProperty
-                            }
-                        }
-                        if (reducers.value is JSObjectLiteralExpressionImpl) {
-                            val findProperty = (reducers.value as JSObjectLiteralExpressionImpl).findProperty(func)
-                            if (findProperty != null) {
-                                return findProperty
+        for (li in jsFile.children) {
+            if (li is ES6ExportDefaultAssignment) { //是否 export default
+                for (exportParam in li.children) {
+                    if (exportParam is JSObjectLiteralExpression) {
+                        for (jsP in exportParam.children) {
+                            if (jsP is JSPropertyImpl) {
+                                if (jsP.name == EFFECTS || jsP.name == REDUCERS) {
+                                    val jsExpression = jsP.value ?: return null
+                                    if (jsExpression is JSObjectLiteralExpressionImpl) {
+                                        for (functionP in jsExpression.children) {
+                                            if (functionP is JSFunctionProperty) {
+                                                if (functionP.name == func) {
+                                                    return functionP
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

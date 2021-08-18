@@ -1,4 +1,4 @@
-package com.github.liaoxiangyun.ideaplugin.js.setting
+package com.github.liaoxiangyun.ideaplugin.javascript.setting
 
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.ServiceManager

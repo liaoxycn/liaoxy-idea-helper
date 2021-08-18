@@ -1,6 +1,6 @@
-package com.github.liaoxiangyun.ideaplugin.listeners
+package com.github.liaoxiangyun.ideaplugin.common.listeners
 
-import com.github.liaoxiangyun.ideaplugin.ProjectOpened
+import com.github.liaoxiangyun.ideaplugin.common.services.ProjectOpened
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManagerListener

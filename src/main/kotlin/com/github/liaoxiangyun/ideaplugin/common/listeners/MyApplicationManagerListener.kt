@@ -1,6 +1,6 @@
-package com.github.liaoxiangyun.ideaplugin.listeners
+package com.github.liaoxiangyun.ideaplugin.common.listeners
 
-import com.github.liaoxiangyun.ideaplugin.services.MyApplicationService
+import com.github.liaoxiangyun.ideaplugin.common.services.MyApplicationService
 import com.intellij.ide.AppLifecycleListener
 import com.intellij.ide.ApplicationInitializedListener
 import com.intellij.ide.ApplicationLoadListener

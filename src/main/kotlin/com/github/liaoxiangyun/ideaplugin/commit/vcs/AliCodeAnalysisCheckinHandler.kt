@@ -19,7 +19,7 @@ import com.alibaba.p3c.idea.inspection.AliBaseInspection
 import com.github.liaoxiangyun.ideaplugin.commit.CommitMessage
 import com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState
 import com.github.liaoxiangyun.ideaplugin.common.util.Notify
-import com.github.liaoxiangyun.ideaplugin.compatible.inspection.Inspections
+import com.github.liaoxiangyun.ideaplugin.coderaminder.inspection.compatible.Inspections
 import com.intellij.codeInspection.InspectionManager
 import com.intellij.codeInspection.LocalInspectionTool
 import com.intellij.openapi.application.ApplicationManager
@@ -45,7 +45,6 @@ import com.intellij.ui.NonFocusableCheckBox
 import com.intellij.util.ExceptionUtil
 import com.intellij.util.PairConsumer
 import java.awt.BorderLayout
-import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.JComponent

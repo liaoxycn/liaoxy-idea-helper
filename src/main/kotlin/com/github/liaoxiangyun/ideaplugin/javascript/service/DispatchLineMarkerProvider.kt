@@ -1,7 +1,7 @@
-package com.github.liaoxiangyun.ideaplugin.js.service
+package com.github.liaoxiangyun.ideaplugin.javascript.service
 
-import com.github.liaoxiangyun.ideaplugin.js.constant.Icons
-import com.github.liaoxiangyun.ideaplugin.js.model.Dispatch
+import com.github.liaoxiangyun.ideaplugin.javascript.constant.Icons
+import com.github.liaoxiangyun.ideaplugin.javascript.model.Dispatch
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
@@ -24,21 +24,18 @@ class DispatchLineMarkerProvider : RelatedItemLineMarkerProvider() {
             }
             println("========= dispatch = $dispatch")
             val jsService = JsService.getInstance(element.project)
-            val jsFile = jsService.getJSFile(dispatch.namespace)
+            val jsFile = jsService.getJSFile(dispatch.namespace) ?: return
+            val s = System.currentTimeMillis()
             val modelsFunc = jsService.getModelsFunc(jsFile, dispatch.function)
-            println("jsFile = ${jsFile}")
-            if (jsFile != null) {
-                //构建导航图标的builder
-                val builder = NavigationGutterIconBuilder.create(Icons.down)
-                        .setAlignment(GutterIconRenderer.Alignment.CENTER) //target是xmlTag
-                        .setTargets(modelsFunc ?: jsFile)
-                        .setTooltipTitle("导航到models function")
-
-//                PsiElement nameIdentifier = ((PsiNameIdentifierOwner) element).getNameIdentifier();
-                val lineMarkerInfo = builder.createLineMarkerInfo(
-                        Objects.requireNonNull(dispatch.typePsi.firstChild))
-                result.add(lineMarkerInfo)
-            }
+            println("getModelsFunc 耗时${System.currentTimeMillis() - s}")
+            //构建导航图标的builder
+            val builder = NavigationGutterIconBuilder.create(Icons.down)
+                    .setAlignment(GutterIconRenderer.Alignment.CENTER) //target是xmlTag
+                    .setTargets(modelsFunc ?: jsFile)
+                    .setTooltipTitle("导航到models function")
+            val lineMarkerInfo = builder.createLineMarkerInfo(
+                    Objects.requireNonNull(dispatch.typePsi.firstChild))
+            result.add(lineMarkerInfo)
         }
     }
 

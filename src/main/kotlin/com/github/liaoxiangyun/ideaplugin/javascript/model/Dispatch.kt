@@ -1,4 +1,4 @@
-package com.github.liaoxiangyun.ideaplugin.js.model
+package com.github.liaoxiangyun.ideaplugin.javascript.model
 
 import com.intellij.openapi.util.text.StringUtilRt
 import com.intellij.psi.PsiElement

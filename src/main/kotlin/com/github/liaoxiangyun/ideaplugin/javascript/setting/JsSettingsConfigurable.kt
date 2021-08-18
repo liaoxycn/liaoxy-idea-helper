@@ -1,4 +1,4 @@
-package com.github.liaoxiangyun.ideaplugin.js.setting
+package com.github.liaoxiangyun.ideaplugin.javascript.setting
 
 import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant
 import com.intellij.openapi.options.Configurable

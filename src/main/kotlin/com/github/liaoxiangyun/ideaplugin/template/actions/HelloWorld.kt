@@ -1,4 +1,4 @@
-package com.github.liaoxiangyun.ideaplugin.actions
+package com.github.liaoxiangyun.ideaplugin.template.actions
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
