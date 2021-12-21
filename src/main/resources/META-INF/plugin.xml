@@ -74,25 +74,7 @@
             </action>
             <!-- javascript -->
             <separator/>
-            <!-- template -->
-            <group id="TemplateActionMenu" text="代码生成" popup="true"
-                   class="com.github.liaoxiangyun.ideaplugin.template.actions.TemplateAction">
-                <separator/>
-                <!--                <action id="TemplateGetActionMenu"-->
-                <!--                        class="com.github.liaoxiangyun.ideaplugin.template.actions.TemplateGetAction"-->
-                <!--                        text="获取模版">-->
-                <!--                </action>-->
-            </group>
-            <!-- template -->
         </group>
-        <action class="com.github.liaoxiangyun.ideaplugin.template.actions.TemplateGetAction"
-                id="com.github.liaoxiangyun.ideaplugin.template.actions.TemplateGetAction"
-                popup="true" text="template test" description="description" icon="AllIcons.Actions.AddMulticaret">
-            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
-            <add-to-group group-id="ChangesViewPopupMenu" anchor="last"/>
-            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-        </action>
-
 
         <action id="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction"
                 class="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction"
