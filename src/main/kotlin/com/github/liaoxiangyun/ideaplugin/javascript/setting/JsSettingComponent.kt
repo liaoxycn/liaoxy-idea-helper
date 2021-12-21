@@ -17,10 +17,7 @@ import javax.swing.JPanel
 class JsSettingComponent {
     val panel: JPanel
     private val myText = JBTextField()
-
     private val enableCheck = JBCheckBox("开启? ")
-
-    private val templateUrl = JBTextField()
 
     val preferredFocusedComponent: JComponent
         get() = myText
@@ -30,13 +27,6 @@ class JsSettingComponent {
         set(value) {
             enableCheck.isSelected = value
         }
-
-    var templateUrlVal: String
-        get() = templateUrl.text
-        set(value) {
-            templateUrl.text = value
-        }
-
 
     init {
         val jbLabel = JBLabel("")
@@ -49,12 +39,14 @@ class JsSettingComponent {
         }
 
         panel = FormBuilder.createFormBuilder()
-            .addLabeledComponent(JBLabel("当前项目："), JBLabel("${ProjectUtils.currProject?.name}"), 1, false)
+            .addLabeledComponent(JBLabel("当前项目："),
+                JBLabel("${ProjectUtils.currProject?.name}"), 1, false)
             .addSeparator()
             .addComponent(enableCheck)
             .addLabeledComponent(JBLabel("React umi 管理："), jButton, 1, false)
             .addLabeledComponent(JBLabel(""), jbLabel, 1, false)
             .addSeparator()
+            .addComponentFillVertically(JPanel(), 0)
             .panel
     }
 }
