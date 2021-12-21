@@ -19,10 +19,11 @@ class AppSettingsState : PersistentStateComponent<AppSettingsState> {
 
     var origin = "http://zentaopro.szewec.com/"
     var cookie = ""
+    var user = ""
+    var password = ""
 
     var taskList = arrayListOf<String>()
     var bugList = arrayListOf<String>()
-    var storyList = arrayListOf<String>()
 
     var analysisBeforeCheckin = true
 

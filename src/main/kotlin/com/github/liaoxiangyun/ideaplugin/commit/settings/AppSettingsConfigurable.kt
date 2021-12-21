@@ -32,6 +32,8 @@ class AppSettingsConfigurable : Configurable {
         modified = modified or (mySettingsComponent!!.ideaUserStatus != settings.ideaStatus)
         modified = modified or (mySettingsComponent!!.originText != settings.origin)
         modified = modified or (mySettingsComponent!!.cookieText != settings.cookie)
+        modified = modified or (mySettingsComponent!!.userText != settings.user)
+        modified = modified or (mySettingsComponent!!.passwordText != settings.password)
         modified = modified or (mySettingsComponent!!.responsiblePersonText != settings.responsiblePerson)
         modified = modified or (mySettingsComponent!!.inspectorText != settings.inspector)
         return modified
@@ -42,6 +44,8 @@ class AppSettingsConfigurable : Configurable {
         settings.userId = mySettingsComponent!!.userNameText
         settings.ideaStatus = mySettingsComponent!!.ideaUserStatus
         settings.origin = mySettingsComponent!!.originText
+        settings.user = mySettingsComponent!!.userText
+        settings.password = mySettingsComponent!!.passwordText
         settings.cookie = mySettingsComponent!!.cookieText
         settings.responsiblePerson = mySettingsComponent!!.responsiblePersonText
         settings.inspector = mySettingsComponent!!.inspectorText
@@ -52,6 +56,8 @@ class AppSettingsConfigurable : Configurable {
         mySettingsComponent!!.userNameText = settings.userId
         mySettingsComponent!!.ideaUserStatus = settings.ideaStatus
         mySettingsComponent!!.originText = settings.origin
+        mySettingsComponent!!.userText = settings.user
+        mySettingsComponent!!.passwordText = settings.password
         mySettingsComponent!!.cookieText = settings.cookie
         mySettingsComponent!!.responsiblePersonText = settings.responsiblePerson
         mySettingsComponent!!.inspectorText = settings.inspector

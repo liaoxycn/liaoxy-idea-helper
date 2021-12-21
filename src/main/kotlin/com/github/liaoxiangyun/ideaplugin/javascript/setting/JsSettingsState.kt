@@ -1,4 +1,4 @@
-package com.github.liaoxiangyun.ideaplugin.js.setting
+package com.github.liaoxiangyun.ideaplugin.javascript.setting
 
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.ServiceManager
@@ -14,7 +14,6 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 @State(name = "com.github.liaoxiangyun.ideaplugin.js.settings.JsSettingsState", storages = [Storage("JsSettingsState.xml")])
 class JsSettingsState : PersistentStateComponent<JsSettingsState> {
     var enableStatus = false
-
 
     override fun getState(): JsSettingsState {
         return this

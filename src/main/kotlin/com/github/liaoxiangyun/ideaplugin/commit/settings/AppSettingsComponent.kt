@@ -14,6 +14,8 @@ class AppSettingsComponent {
     val panel: JPanel
     private val myUserNameText = JBTextField()
     private val origin = JBTextField()
+    private val user = JBTextField()
+    private val password = JBTextField()
     private val cookie = JBTextField()
     private val responsiblePerson = JBTextField()
     private val inspector = JBTextField()
@@ -29,6 +31,16 @@ class AppSettingsComponent {
         get() = origin.text
         set(newText) {
             origin.text = newText
+        }
+    var userText: String
+        get() = user.text
+        set(newText) {
+            user.text = newText
+        }
+    var passwordText: String
+        get() = password.text
+        set(newText) {
+            password.text = newText
         }
     var cookieText: String
         get() = cookie.text
@@ -54,6 +66,8 @@ class AppSettingsComponent {
     init {
         panel = FormBuilder.createFormBuilder()
                 .addLabeledComponent(JBLabel("禅道地址："), origin, 1, false)
+                .addLabeledComponent(JBLabel("账号："), user, 1, false)
+                .addLabeledComponent(JBLabel("密码："), password, 1, false)
                 .addLabeledComponent(JBLabel("Cookie："), cookie, 1, false)
                 .addLabeledComponent(JBLabel("责任人："), responsiblePerson, 1, false)
                 .addLabeledComponent(JBLabel("检视人："), inspector, 1, false)

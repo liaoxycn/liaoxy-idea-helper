@@ -1,4 +1,4 @@
-package com.github.liaoxiangyun.ideaplugin.js.setting
+package com.github.liaoxiangyun.ideaplugin.javascript.setting
 
 import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant
 import com.intellij.openapi.options.Configurable
@@ -29,15 +29,22 @@ class JsSettingsConfigurable : Configurable {
 
     override fun isModified(): Boolean {
         val settings = JsSettingsState.instance
-        return false
+        println("mySettingsComponent!!.enableVal = ${mySettingsComponent!!.enableVal}")
+        var modified = false
+        modified = mySettingsComponent!!.enableVal != settings.enableStatus
+        //
+        println("modified = $modified")
+        return modified
     }
 
     override fun apply() {
         val settings = JsSettingsState.instance
+        settings.enableStatus = mySettingsComponent!!.enableVal
     }
 
     override fun reset() {
         val settings = JsSettingsState.instance
+        mySettingsComponent!!.enableVal = settings.enableStatus
     }
 
     override fun disposeUIResources() {

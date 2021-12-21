@@ -1,4 +1,4 @@
-package com.github.liaoxiangyun.ideaplugin.js.constant
+package com.github.liaoxiangyun.ideaplugin.javascript.constant
 
 import com.intellij.openapi.util.IconLoader
 import javax.swing.Icon

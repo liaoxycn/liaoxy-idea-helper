@@ -26,19 +26,20 @@
         <checkinHandlerFactory
                 implementation="com.github.liaoxiangyun.ideaplugin.commit.vcs.AliCodeAnalysisCheckinHandlerFactory"
                 order="first"/>
-        <applicationService serviceImplementation="com.github.liaoxiangyun.ideaplugin.services.MyApplicationService"/>
+        <applicationService
+                serviceImplementation="com.github.liaoxiangyun.ideaplugin.common.services.MyApplicationService"/>
         <applicationService
                 serviceImplementation="com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState"/>
         <applicationService
                 serviceImplementation="com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsState"/>
         <applicationService
-                serviceImplementation="com.github.liaoxiangyun.ideaplugin.js.setting.JsSettingsState"/>
+                serviceImplementation="com.github.liaoxiangyun.ideaplugin.javascript.setting.JsSettingsState"/>
         <applicationConfigurable parentId=""
                                  instance="com.github.liaoxiangyun.ideaplugin.setting.MainSettingsConfigurable"
                                  id="liaoxy-helper"
                                  displayName="IDEA助手"/>
         <applicationConfigurable parentId="liaoxy-helper"
-                                 instance="com.github.liaoxiangyun.ideaplugin.js.setting.JsSettingsConfigurable"
+                                 instance="com.github.liaoxiangyun.ideaplugin.javascript.setting.JsSettingsConfigurable"
                                  id="JavaScript"
                                  displayName="JavaScript"/>
         <applicationConfigurable parentId="liaoxy-helper"
@@ -50,24 +51,49 @@
                                  id="com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsConfigurable"
                                  displayName="代码提交提醒"/>
 
-        <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.ProjectOpened"/>
-        <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.js.service.JsService"/>
+        <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.common.services.ProjectOpened"/>
+        <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.javascript.service.JsService"/>
 
         <!--实现跳转的lineMarkerProvider-->
         <codeInsight.lineMarkerProvider language="JavaScript"
-                                        implementationClass="com.github.liaoxiangyun.ideaplugin.js.service.DispatchLineMarkerProvider"/>
+                                        implementationClass="com.github.liaoxiangyun.ideaplugin.javascript.service.DispatchLineMarkerProvider"/>
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.liaoxiangyun.ideaplugin.listeners.MyProjectManagerListener"
+        <listener class="com.github.liaoxiangyun.ideaplugin.common.listeners.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
-        <listener class="com.github.liaoxiangyun.ideaplugin.listeners.MyApplicationManagerListener"
+        <listener class="com.github.liaoxiangyun.ideaplugin.common.listeners.MyApplicationManagerListener"
                   topic="com.intellij.ide.AppLifecycleListener"/>
     </applicationListeners>
     <actions>
-        <action id="HelloWorld" class="com.github.liaoxiangyun.ideaplugin.actions.HelloWorld" text="Say Hello!">
-            <add-to-group group-id="ToolsMenu" anchor="first"/>
+        <group id="LoxHelperMenu" text="IDEA助手">
+            <add-to-group group-id="MainMenu"/>
+            <!-- javascript -->
+            <action id="JavascriptModelsMenu" class="com.github.liaoxiangyun.ideaplugin.javascript.action.ModelsAction"
+                    text="扫描 models">
+            </action>
+            <!-- javascript -->
+            <separator/>
+            <!-- template -->
+            <group id="TemplateActionMenu" text="代码生成" popup="true"
+                   class="com.github.liaoxiangyun.ideaplugin.template.actions.TemplateAction">
+                <separator/>
+                <!--                <action id="TemplateGetActionMenu"-->
+                <!--                        class="com.github.liaoxiangyun.ideaplugin.template.actions.TemplateGetAction"-->
+                <!--                        text="获取模版">-->
+                <!--                </action>-->
+            </group>
+            <!-- template -->
+        </group>
+        <action class="com.github.liaoxiangyun.ideaplugin.template.actions.TemplateGetAction"
+                id="com.github.liaoxiangyun.ideaplugin.template.actions.TemplateGetAction"
+                popup="true" text="template test" description="description" icon="AllIcons.Actions.AddMulticaret">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+            <add-to-group group-id="ChangesViewPopupMenu" anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
+
+
         <action id="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction"
                 class="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction"
                 text="创建提交模板"
