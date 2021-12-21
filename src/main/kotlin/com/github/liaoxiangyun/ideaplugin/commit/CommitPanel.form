@@ -383,26 +383,9 @@
           <text value="刷新"/>
         </properties>
       </component>
-      <component id="9879d" class="javax.swing.JButton" binding="button3">
-        <constraints>
-          <grid row="7" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="刷新"/>
-        </properties>
-      </component>
       <component id="5323a" class="javax.swing.JComboBox" binding="comboBox1" default-binding="true">
         <constraints>
           <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <editable value="true"/>
-          <model/>
-        </properties>
-      </component>
-      <component id="bde43" class="javax.swing.JComboBox" binding="comboBox2" default-binding="true">
-        <constraints>
-          <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <editable value="true"/>
@@ -464,6 +447,14 @@
           <editable value="false"/>
           <text value=""/>
         </properties>
+      </component>
+      <component id="93498" class="javax.swing.JTextField" binding="comboBox2">
+        <constraints>
+          <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties/>
       </component>
     </children>
   </grid>

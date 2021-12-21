@@ -2,6 +2,7 @@ package com.github.liaoxiangyun.ideaplugin.javascript.service
 
 import com.github.liaoxiangyun.ideaplugin.javascript.constant.Icons
 import com.github.liaoxiangyun.ideaplugin.javascript.model.Dispatch
+import com.github.liaoxiangyun.ideaplugin.javascript.setting.JsSettingsState
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
@@ -18,6 +19,9 @@ class DispatchLineMarkerProvider : RelatedItemLineMarkerProvider() {
         //筛选 dispatch
         if (element.textLength == 8 && element is LeafPsiElement
                 && element.text == "dispatch") {
+            if (!JsSettingsState.instance.enableStatus) {
+                return
+            }
             val dispatch = getDispatch(element)
             if (dispatch == null || !dispatch.valid) {
                 return

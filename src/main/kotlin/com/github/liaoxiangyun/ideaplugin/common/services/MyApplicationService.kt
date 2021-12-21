@@ -26,7 +26,7 @@ class MyApplicationService : Closeable {
         println("#MyApplicationService execTask")
         schedule = AppExecutorUtil.getAppScheduledExecutorService().schedule({
             codingReminderTask()
-            jsTask()
+//            jsTask()
         }, 1, TimeUnit.MINUTES)
     }
 

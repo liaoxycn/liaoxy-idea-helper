@@ -15,7 +15,6 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 class JsSettingsState : PersistentStateComponent<JsSettingsState> {
     var enableStatus = false
 
-
     override fun getState(): JsSettingsState {
         return this
     }

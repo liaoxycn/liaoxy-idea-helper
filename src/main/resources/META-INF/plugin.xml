@@ -26,7 +26,8 @@
         <checkinHandlerFactory
                 implementation="com.github.liaoxiangyun.ideaplugin.commit.vcs.AliCodeAnalysisCheckinHandlerFactory"
                 order="first"/>
-        <applicationService serviceImplementation="com.github.liaoxiangyun.ideaplugin.common.services.MyApplicationService"/>
+        <applicationService
+                serviceImplementation="com.github.liaoxiangyun.ideaplugin.common.services.MyApplicationService"/>
         <applicationService
                 serviceImplementation="com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState"/>
         <applicationService
@@ -65,11 +66,32 @@
                   topic="com.intellij.ide.AppLifecycleListener"/>
     </applicationListeners>
     <actions>
-        <!-- template -->
-        <action id="HelloWorld" class="com.github.liaoxiangyun.ideaplugin.template.actions.HelloWorld" text="Say Hello!">
-            <add-to-group group-id="ToolsMenu" anchor="first"/>
+        <group id="LoxHelperMenu" text="IDEA助手">
+            <add-to-group group-id="MainMenu"/>
+            <!-- javascript -->
+            <action id="JavascriptModelsMenu" class="com.github.liaoxiangyun.ideaplugin.javascript.action.ModelsAction"
+                    text="扫描 models">
+            </action>
+            <!-- javascript -->
+            <separator/>
+            <!-- template -->
+            <group id="TemplateActionMenu" text="代码生成" popup="true"
+                   class="com.github.liaoxiangyun.ideaplugin.template.actions.TemplateAction">
+                <separator/>
+                <!--                <action id="TemplateGetActionMenu"-->
+                <!--                        class="com.github.liaoxiangyun.ideaplugin.template.actions.TemplateGetAction"-->
+                <!--                        text="获取模版">-->
+                <!--                </action>-->
+            </group>
+            <!-- template -->
+        </group>
+        <action class="com.github.liaoxiangyun.ideaplugin.template.actions.TemplateGetAction"
+                id="com.github.liaoxiangyun.ideaplugin.template.actions.TemplateGetAction"
+                popup="true" text="template test" description="description" icon="AllIcons.Actions.AddMulticaret">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+            <add-to-group group-id="ChangesViewPopupMenu" anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
-        <!-- template -->
 
 
         <action id="com.github.liaoxiangyun.ideaplugin.commit.CreateCommitAction"

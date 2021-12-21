@@ -29,15 +29,22 @@ class JsSettingsConfigurable : Configurable {
 
     override fun isModified(): Boolean {
         val settings = JsSettingsState.instance
-        return false
+        println("mySettingsComponent!!.enableVal = ${mySettingsComponent!!.enableVal}")
+        var modified = false
+        modified = mySettingsComponent!!.enableVal != settings.enableStatus
+        //
+        println("modified = $modified")
+        return modified
     }
 
     override fun apply() {
         val settings = JsSettingsState.instance
+        settings.enableStatus = mySettingsComponent!!.enableVal
     }
 
     override fun reset() {
         val settings = JsSettingsState.instance
+        mySettingsComponent!!.enableVal = settings.enableStatus
     }
 
     override fun disposeUIResources() {

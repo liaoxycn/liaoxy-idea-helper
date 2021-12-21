@@ -1,6 +1,8 @@
 package com.github.liaoxiangyun.ideaplugin.commit.util
 
 import com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState
+import com.google.gson.Gson
+import com.intellij.ui.SystemNotifications
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -8,94 +10,121 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.io.IOException
+import java.util.regex.Pattern
 
 
 class HttpHelper {
 
     //  http://zentaopro.szewec.com/index.php?m=my&f=task
+
     private var origin = "http://zentaopro.szewec.com"
+
+    private val cookieTemplate = "zentaosid=%s"
+    private val loginTemplate = "/index.php?m=user&f=login&referer="
+
+
+    private var getSessionUrl = "/index.php?m=api&f=getSessionID&t=json"
+
+    //登录成功{status:"success"}
+    private var loginUrl = "/index.php?m=user&f=login&t=json&account=%s&password=%s&zentaosid=%s"
+
+    private var taskUrl = "/index.php?m=my&f=task&t=json"
+    private var bugUrl = "/index.php?m=my&f=bug&t=json"
+
     private var cookie = ""
-    private var taskUrl = "/index.php?m=my&f=task"
-    private var bugUrl = "/index.php?m=my&f=bug"
     private var storyUrl = "/index.php?m=my&f=story"
     private var otherQuery = "&type=assignedTo&orderBy=id_desc&recTotal=2&recPerPage=100&pageID=1"
 
+    private val gson: Gson = Gson()
+    private var settings: AppSettingsState = AppSettingsState()
+
     companion object {
         val httpClient: OkHttpClient = OkHttpClient.Builder()
-                .build()
+            .build()
     }
 
     init {
-        val settings = AppSettingsState.instance
+        settings = AppSettingsState.instance
         origin = settings.origin.trim { it <= '/' }
-        cookie = settings.cookie
+        cookie = settings.cookie.trim()
+    }
+
+    private fun getHtml(url: String, checkLogin: Boolean): String {
+        val html = getHtml(url)
+        if (checkLogin) {
+            if (loginCheck(html)) {
+                return getHtml(url)
+            }
+        }
+        return html
     }
 
     private fun getHtml(url: String): String {
         val httpUrl = url.toHttpUrl()
-        println("========= getHtml")
-        println(httpUrl)
-        println(httpUrl.host)
+        println("========= getHtml, cookie=$cookie,  httpUrl=${httpUrl}")
         val get: Request.Builder = Request.Builder().url(httpUrl)
-                .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;g=0.9,image/webp,image/apng,*/*;g=0.8,application/signed-exchange;v=b3;q=0.9") //Accept: text/htm,application/xhtml+:xml,application/xml;g=0.9,image/webp,image/apng,*/*;g=0.8,application/signed-exchange;,r=b3;q=0.9
-
-                .addHeader("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")//Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
-
-                .addHeader("Cache-Control", "max-age=0")//Cache-Control: max-age=0
-                .addHeader("Connection", "Keep-Alive") //Connection: Keep-Alive
-                .addHeader("Cookie", cookie) //Connection: Keep-Alive
-                .addHeader("Host", httpUrl.host) //Connection: Keep-Alive
-                .addHeader("Upgrade-Insecure-Requests", "1") //Upgrade-Insecure-Requests: 1
-                .addHeader("User-Agent", "Mozilla/5.0 (Windows NF 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36 Edg/88.0.705.50") //User-Agent: Mozilla/5.0 (Windows NF 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36 Edg/88.0.705.50
-
-                .get()
+            .addHeader("Cookie", cookie) //zentaosid=%s
+            .get()
         val request: Request = get.build()
         httpClient.newCall(request).execute().use { response ->
             return if (response.isSuccessful) {
                 val body = response.body
-                body!!.string()
+                val string = body!!.string()
+                if (string?.length < 200) {
+                    println("${string.trim()}")
+                } else {
+                    println("html too long . . . . . .")
+                }
+                string
             } else {
                 throw IOException("Unexpected code $response")
             }
         }
     }
 
+    open fun getBugList(): ArrayList<Bug> {
+        val bugHtml = getHtml(origin + bugUrl, true)
+        val resp = gson.fromJson(bugHtml, Resp::class.java)
+        println(gson.toJson(resp))
+        val myTask = gson.fromJson(resp.data, MyTask::class.java)
+        return myTask.bugs
+    }
 
-    private fun getTBodyTdTextList(tbody: Element?): ArrayList<ArrayList<String>> {
-        var trList = arrayListOf<ArrayList<String>>()
-        if (tbody == null) {
-            println("tbody is null")
-            return trList
-        }
-        for (trIndex in tbody.getElementsByTag("tr").withIndex()) {
-            var tdList = arrayListOf<String>()
-            for (tdIndex in trIndex.value.getElementsByTag("td").withIndex()) {
-                tdList.add(tdIndex.value.text().trim())
+    open fun getTaskList(): ArrayList<Task> {
+        var taskHtml = getHtml(origin + taskUrl, true)
+        val resp = gson.fromJson(taskHtml, Resp::class.java)
+        println(gson.toJson(resp))
+        val myTask = gson.fromJson(resp.data, MyTask::class.java)
+        return myTask.tasks
+    }
+
+    private fun loginCheck(html: String): Boolean {
+        if (html.contains(loginTemplate)) {
+            println("检查是否要登录, loginCheck=true")
+            if (settings.user.isBlank() || settings.password.isBlank()) {
+                throw RuntimeException("请先填写账号密码")
             }
-            trList.add(tdList)
+            val getSessionHtml = getHtml(origin + getSessionUrl)
+            val data = gson.fromJson(getSessionHtml, Resp::class.java).data
+            val sessionID = gson.fromJson(data, Ses::class.java).sessionID
+            println("data=${data}, sessionID=${sessionID}")
+
+            val loginHtml = getHtml(origin + loginUrl.format(settings.user, settings.password, sessionID))
+            val loginRes = gson.fromJson(loginHtml, Resp::class.java)
+            if (loginRes.status != "success") {
+                throw RuntimeException("自动登录失败，请检查账号密码，${loginRes.reason}")
+            }
+            println("禅道自动登录成功")
+            SystemNotifications.getInstance().notify(
+                "IDEA助手",
+                "禅道自动登录成功", "${settings.user}禅道自动登录成功"
+            )
+            cookie = cookieTemplate.format(sessionID)
+            settings.cookie = cookie
+            return true
         }
-        return trList
-    }
-
-    open fun getBugList(): ArrayList<ArrayList<String>> {
-        val bugHtml = getHtml(origin + bugUrl)
-        val document: Document = Jsoup.parse(bugHtml)
-        val tbody = document.getElementsByTag("tbody").first()
-        return getTBodyTdTextList(tbody)
-    }
-
-    open fun getStoryList(): ArrayList<ArrayList<String>> {
-        val storyHtml = getHtml(origin + storyUrl)
-        val document: Document = Jsoup.parse(storyHtml)
-        val tbody = document.getElementsByTag("tbody").first()
-        return getTBodyTdTextList(tbody)
-    }
-
-    open fun getTaskList(): ArrayList<ArrayList<String>> {
-        val taskHtml = getHtml(origin + taskUrl)
-        val document: Document = Jsoup.parse(taskHtml)
-        val tbody = document.getElementsByTag("tbody").first()
-        return getTBodyTdTextList(tbody)
+        println("检查是否要登录, loginCheck=false")
+        return false
     }
 
 
