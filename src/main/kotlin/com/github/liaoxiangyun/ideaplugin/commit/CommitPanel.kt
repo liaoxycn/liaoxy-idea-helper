@@ -236,13 +236,8 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
                         val desc = matcher.group(1)
                         val storyID = matcher.group(2)
                         val storyTitle = matcher.group(3)
-                        textField1?.text = desc
-                        comboBox2?.text = storyID
-//                        val taskId = find(s, 1)
-//                        println("选择任务 taskId = $taskId")
-//                        val storyId = HttpHelper().getStoryIdByTaskId(taskId)
-//                        println("找到需求id storyId = $storyId")
-//                        comboBox2?.text = storyId
+                        textField1?.text = desc?.trim()
+                        comboBox2?.text = storyID?.trim()
                     }
                 }
             }
@@ -252,10 +247,10 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
             run {
                 if (e.stateChange == ItemEvent.SELECTED) {
                     val s = comboBox1?.selectedItem as String
-                    val matcher = Pattern.compile("#\\d+(.*?)").matcher(s)
+                    val matcher = Pattern.compile("#\\d+(.*)").matcher(s)
                     if (matcher.find()) {
                         val group = matcher.group(1)
-                        textField6?.text = group
+                        textField6?.text = group?.trim()
                     }
                 }
             }
@@ -279,8 +274,8 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
                 var commitLine = changeType.commitLines()[lines]
                 if (!Util.isEmpty(commitLine.fixedVal)) {
                     Util.setValue(it!!, commitLine.fixedVal!!)
-                } else if (Util.isEmpty(value) && !Util.isEmpty(commitLine.defVal)) {
-                    Util.setValue(it!!, commitLine.defVal!!)
+                } else if (Util.isEmpty(value) && !Util.isEmpty(commitLine.getDefValue())) {
+                    Util.setValue(it!!, commitLine.getDefValue()!!)
                 }
                 lines++
             }
@@ -313,7 +308,6 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
             when (name) {
                 "任务ID" -> {
                     val dataList = HttpHelper().getTaskList()
-//                    var list = dataList.map { tr -> "任务#${tr[0]} ${tr[3]}" }
                     var list = dataList.map { tr -> "任务#${tr.id} ${tr.name} 需求#${tr.storyID} ${tr.storyTitle}" }
                     settings.taskList = list as ArrayList<String>
                     setDefItem(changeScope, list)
@@ -329,7 +323,7 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
             try {
                 e.printStackTrace()
                 Notify.showErrorNotification(
-                    "获取失败，请检查地址或Cookie" + e.message, project
+                    "获取失败! ,  " + e.message, project
                         ?: null, "${Constant.commitName}："
                 )
             } catch (e: Exception) {

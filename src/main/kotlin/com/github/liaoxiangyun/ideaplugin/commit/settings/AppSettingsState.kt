@@ -11,7 +11,10 @@ import com.intellij.util.xmlb.XmlSerializerUtil
  * The [State] and [Storage] annotations define the name of the data and the file name where
  * these persistent application settings are stored.
  */
-@State(name = "com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState", storages = [Storage("MySettings.xml")])
+@State(
+    name = "com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState",
+    storages = [Storage("MySettings.xml")]
+)
 class AppSettingsState : PersistentStateComponent<AppSettingsState> {
 
     var userId = "John Q. Public"
@@ -46,12 +49,8 @@ class AppSettingsState : PersistentStateComponent<AppSettingsState> {
     }
 
     companion object {
-        private var c: AppSettingsState? = null
         open fun getConfig(): AppSettingsState {
-            if (c == null) {
-                c = instance
-            }
-            return c!!
+            return instance
         }
 
         val instance: AppSettingsState

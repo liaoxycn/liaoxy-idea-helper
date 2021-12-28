@@ -1,6 +1,6 @@
 package com.github.liaoxiangyun.ideaplugin.commit.util
 
-class MyTask {
+class MyTodo {
 
     var title = ""
     var tabID = ""

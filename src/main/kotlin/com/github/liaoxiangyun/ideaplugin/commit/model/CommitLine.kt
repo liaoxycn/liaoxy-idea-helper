@@ -1,5 +1,7 @@
 package com.github.liaoxiangyun.ideaplugin.commit.model
 
+import com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsState
+import java.util.*
 import java.util.regex.Pattern
 
 class CommitLine {
@@ -11,10 +13,20 @@ class CommitLine {
 
     var component: Any? = null
 
+    fun getDefValue(): Any? {
+        return if (Objects.equals(this.defVal, "responsiblePerson")) {
+            AppSettingsState.getConfig().responsiblePerson
+        } else if (Objects.equals(this.defVal, "inspector")) {
+            AppSettingsState.getConfig().inspector
+        } else {
+            defVal
+        }
+    }
+
     constructor(
-            lineName: String, require: Boolean, regex: Pattern?,
-            defVal: Any? = null,
-            fixedVal: Any? = null,
+        lineName: String, require: Boolean, regex: Pattern?,
+        defVal: Any? = null,
+        fixedVal: Any? = null,
     ) {
         this.lineName = lineName
         this.require = require
