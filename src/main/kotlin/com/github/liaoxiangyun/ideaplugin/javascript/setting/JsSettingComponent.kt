@@ -17,7 +17,7 @@ import javax.swing.JPanel
 class JsSettingComponent {
     val panel: JPanel
     private val myText = JBTextField()
-    private val enableCheck = JBCheckBox("开启? ")
+    private val enableCheck = JBCheckBox("开启models导航? ")
 
     val preferredFocusedComponent: JComponent
         get() = myText
