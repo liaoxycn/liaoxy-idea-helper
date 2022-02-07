@@ -29,6 +29,10 @@ class JsService(private val project: Project) {
         loadModelsIndex()
     }
 
+    fun getModelsMap(): MutableMap<String, JSFile> {
+        return modelsMap;
+    }
+
     fun addDispatch(dispatch: Dispatch) {
         if (dispatch.valid) {
             var list = dispatchMap[dispatch.type!!]
@@ -126,6 +130,7 @@ class JsService(private val project: Project) {
         val dumb = DumbService.getInstance(project).isDumb
         println("#loadIndex project=${project.name} dumb=$dumb")
         if (!dumb) {
+            modelsMap.clear()
             val virtualFile = project.guessProjectDir() ?: return ""
             val directory = PsiManager.getInstance(project).findDirectory(virtualFile!!) ?: return ""
             val src = directory.findSubdirectory(src) ?: return ""

@@ -17,7 +17,9 @@ import javax.swing.JPanel
 class JsSettingComponent {
     val panel: JPanel
     private val myText = JBTextField()
-    private val enableCheck = JBCheckBox("开启models导航? ")
+    private val modelIcon = JBCheckBox("启用model图标")
+    private val enableCheck = JBCheckBox("dispatch导航")
+    private val enableLoading = JBCheckBox("loading导航")
 
     val preferredFocusedComponent: JComponent
         get() = myText
@@ -26,6 +28,18 @@ class JsSettingComponent {
         get() = enableCheck.isSelected
         set(value) {
             enableCheck.isSelected = value
+        }
+
+    var enableLoadingVal: Boolean
+        get() = enableLoading.isSelected
+        set(value) {
+            enableLoading.isSelected = value
+        }
+
+    var modelIconVal: Boolean
+        get() = modelIcon.isSelected
+        set(value) {
+            modelIcon.isSelected = value
         }
 
     init {
@@ -38,15 +52,20 @@ class JsSettingComponent {
             jbLabel.text = msg
         }
 
+        enableLoading.isEnabled = false
         panel = FormBuilder.createFormBuilder()
-            .addLabeledComponent(JBLabel("当前项目："),
-                JBLabel("${ProjectUtils.currProject?.name}"), 1, false)
-            .addSeparator()
-            .addComponent(enableCheck)
-            .addLabeledComponent(JBLabel("React umi 管理："), jButton, 1, false)
-            .addLabeledComponent(JBLabel(""), jbLabel, 1, false)
-            .addSeparator()
-            .addComponentFillVertically(JPanel(), 0)
-            .panel
+                .addLabeledComponent(
+                        JBLabel("当前项目："),
+                        JBLabel("${ProjectUtils.currProject?.name}"), 1, false
+                )
+                .addSeparator()
+                .addLabeledComponent(JBLabel("dva model 管理："), jButton, 1, false)
+                .addLabeledComponent(JBLabel(""), jbLabel, 1, false)
+                .addComponent(modelIcon)
+                .addComponent(enableCheck)
+                .addComponent(enableLoading)
+                .addSeparator()
+                .addComponentFillVertically(JPanel(), 0)
+                .panel
     }
 }
