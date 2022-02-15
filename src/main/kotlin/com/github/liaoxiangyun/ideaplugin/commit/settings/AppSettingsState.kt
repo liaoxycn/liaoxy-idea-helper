@@ -40,6 +40,10 @@ class AppSettingsState : PersistentStateComponent<AppSettingsState> {
      */
     var inspector = "李四"
 
+
+    var q1 = false
+    var q2 = false
+
     override fun getState(): AppSettingsState {
         return this
     }

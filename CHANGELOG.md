@@ -4,7 +4,8 @@
 
 ## [Unreleased]
 ### Added
-- 2021-12-30 : 修改一些Bug [liaoxy-helper-v1.0.0](https://github.com/liaoxiangyun/liaoxy-idea-helper/releases/tag/1.x)
+- 2022-02-14 : 自动补全 [liaoxy-helper-v1.1.0](https://github.com/liaoxiangyun/liaoxy-idea-helper/releases/tag/1.x)
+- 2021-12-30 : 修改一些Bug
 - 2021-08-12 : umi dispatch 导航 
 - 2021-07-13 : 代码提交提醒 
 - 2021-07-13 : commit模板增加 第三方代码引入 等类型 

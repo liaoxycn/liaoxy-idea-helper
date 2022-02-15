@@ -6,10 +6,10 @@ class Task {
     var type = ""
 
     var name = ""
-    var desc = ""
+    var desc: String? = ""
 
-    var storyID = ""
-    var storyTitle = ""
+    var storyID: String? = ""
+    var storyTitle: String? = ""
     var storyStatus = ""
 
 }

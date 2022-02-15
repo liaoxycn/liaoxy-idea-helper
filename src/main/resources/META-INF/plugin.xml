@@ -34,16 +34,22 @@
                 serviceImplementation="com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsState"/>
         <applicationService
                 serviceImplementation="com.github.liaoxiangyun.ideaplugin.javascript.setting.JsSettingsState"/>
+        <applicationService
+                serviceImplementation="com.github.liaoxiangyun.ideaplugin.java.setting.JavaSettingsState"/>
         <applicationConfigurable parentId=""
                                  instance="com.github.liaoxiangyun.ideaplugin.setting.MainSettingsConfigurable"
                                  id="liaoxy-helper"
-                                 displayName="IDEA助手" >
+                                 displayName="IDEA助手">
 
         </applicationConfigurable>
         <applicationConfigurable parentId="liaoxy-helper"
                                  instance="com.github.liaoxiangyun.ideaplugin.javascript.setting.JsSettingsConfigurable"
                                  id="JavaScript"
                                  displayName="JavaScript"/>
+        <applicationConfigurable parentId="liaoxy-helper"
+                                 instance="com.github.liaoxiangyun.ideaplugin.java.setting.JavaSettingConfigurable"
+                                 id="Java"
+                                 displayName="Java"/>
         <applicationConfigurable parentId="liaoxy-helper"
                                  instance="com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsConfigurable"
                                  id="com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsConfigurable"
@@ -62,6 +68,8 @@
         <!--model图标-->
         <iconProvider id="baomidou.XmlAndMapperIconProvider"
                       implementation="com.github.liaoxiangyun.ideaplugin.javascript.provider.ModelIconProvider"/>
+        <completion.contributor id="baomidou.MapperMethodCompletionContributor" language="JAVA"
+                                implementationClass="com.github.liaoxiangyun.ideaplugin.java.contributor.EwParamCompletionContributor"/>
     </extensions>
 
     <applicationListeners>

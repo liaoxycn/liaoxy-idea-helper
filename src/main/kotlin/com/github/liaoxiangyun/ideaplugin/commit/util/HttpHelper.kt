@@ -29,14 +29,14 @@ class HttpHelper {
 
     private var cookie = ""
     private var storyUrl = "/index.php?m=my&f=story"
-    private var otherQuery = "&type=assignedTo&orderBy=id_desc&recTotal=2&recPerPage=100&pageID=1"
+    private var otherQuery = "&type=assignedTo&orderBy=id_desc&recPerPage=100&pageID=1"
 
     private val gson: Gson = Gson()
     private var settings: AppSettingsState = AppSettingsState()
 
     companion object {
         val httpClient: OkHttpClient = OkHttpClient.Builder()
-            .build()
+                .build()
     }
 
     init {
@@ -59,8 +59,8 @@ class HttpHelper {
         val httpUrl = url.toHttpUrl()
         println("========= httpGet, cookie=\"$cookie\",  httpUrl=${httpUrl}")
         val get: Request.Builder = Request.Builder().url(httpUrl)
-            .addHeader("Cookie", cookie) //zentaosid=%s
-            .get()
+                .addHeader("Cookie", cookie) //zentaosid=%s
+                .get()
         val request: Request = get.build()
         httpClient.newCall(request).execute().use { response ->
             return if (response.isSuccessful) {
@@ -77,14 +77,14 @@ class HttpHelper {
     }
 
     open fun getBugList(): ArrayList<Bug> {
-        val resp = httpGetJSON(origin + bugUrl, true)
+        val resp = httpGetJSON(origin + bugUrl + otherQuery, true)
         println("resp status=${gson.toJson(resp.status)}")
         val myTodo = gson.fromJson(resp.data, MyTodo::class.java)
         return myTodo.bugs
     }
 
     open fun getTaskList(): ArrayList<Task> {
-        var resp = httpGetJSON(origin + taskUrl, true)
+        var resp = httpGetJSON(origin + taskUrl + otherQuery, true)
         println("resp status=${gson.toJson(resp.status)}")
         val myTodo = gson.fromJson(resp.data, MyTodo::class.java)
         return myTodo.tasks
@@ -92,8 +92,8 @@ class HttpHelper {
 
     private fun loginCheck(data: String): Boolean {
         println(
-            "检查是否要登录, (html.length < 300)${data.length < 300} " +
-                    "&& ${data.contains("locate")}(html.contains(\"locate\"))"
+                "检查是否要登录, (html.length < 300)${data.length < 300} " +
+                        "&& ${data.contains("locate")}(html.contains(\"locate\"))"
         )
         if (data.length < 300 && data.contains("locate")) {
             if (settings.user.isBlank() || settings.password.isBlank()) {
@@ -111,8 +111,8 @@ class HttpHelper {
             }
             println("禅道自动登录成功！")
             SystemNotifications.getInstance().notify(
-                "IDEA助手",
-                "禅道自动登录成功", "${settings.user}禅道自动登录成功"
+                    "IDEA助手",
+                    "禅道自动登录成功", "${settings.user}禅道自动登录成功"
             )
             cookie = cookieTemplate.format(sessionID)
             settings.cookie = cookie
