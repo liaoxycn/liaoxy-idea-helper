@@ -27,8 +27,12 @@ class DispatchLineMarkerProvider : RelatedItemLineMarkerProvider() {
                 return
             }
             println("========= dispatch = $dispatch")
+            val moduleName = JsService.getModulePath(element.containingFile.virtualFile)
             val jsService = JsService.getInstance(element.project)
-            val jsFile = jsService.getJSFile(dispatch.namespace) ?: return
+            if (!jsService.isUmi) {
+                return
+            }
+            val jsFile = jsService.getJSFileBy("$moduleName:${dispatch.namespace}") ?: return
             val modelsFunc = jsService.getModelsFunc(jsFile, dispatch.function)
             //构建导航图标的builder
             val builder = NavigationGutterIconBuilder.create(Icons.down)

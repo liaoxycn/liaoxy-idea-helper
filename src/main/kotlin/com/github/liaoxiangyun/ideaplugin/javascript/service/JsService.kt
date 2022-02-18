@@ -12,6 +12,7 @@ import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.text.StringUtilRt
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
@@ -23,7 +24,6 @@ class JsService(private val project: Project) {
     var isUmi: Boolean = false
     val modelsMap: MutableMap<String, WeakReference<JSFile>> = mutableMapOf()
     val modelsPathMap: MutableMap<String, WeakReference<JSFile>> = mutableMapOf()
-    val modelsNameMap: MutableMap<String, WeakReference<JSFile>> = mutableMapOf()
     private val dispatchMap: MutableMap<String, MutableSet<PsiElement>> = mutableMapOf()
     private var time: Long = 0
 
@@ -36,7 +36,6 @@ class JsService(private val project: Project) {
     fun clearMap() {
         modelsMap.clear()
         modelsPathMap.clear()
-        modelsNameMap.clear()
     }
 
     fun addDispatch(dispatch: Dispatch) {
@@ -50,8 +49,8 @@ class JsService(private val project: Project) {
         }
     }
 
-    fun getJSFile(namespace: String): JSFile? {
-        return modelsMap[namespace]?.get()
+    fun getJSFileBy(key: String): JSFile? {
+        return modelsMap[key]?.get()
     }
 
     private fun searchModelsDir(dir: PsiDirectory) {
@@ -73,7 +72,7 @@ class JsService(private val project: Project) {
                 searchModelJSFile(child)
             } else if (child is JSFile) {
                 println("#JSFile  P:${dir.name}  T:js   C:${child.name}")
-                addModelJSFile2(child)
+                addModelJSFile(child)
             } else {
                 println("#JSFile  P:${dir.name}  T:other   C:${child}")
             }
@@ -81,13 +80,14 @@ class JsService(private val project: Project) {
     }
 
 
-    private fun addModelJSFile2(jsFile: JSFile) {
+    private fun addModelJSFile(jsFile: JSFile) {
         val namespace = getNamespace(jsFile)
         if (namespace.isNotBlank()) {
             val weakReference = WeakReference(jsFile)
-            modelsMap[StringUtilRt.unquoteString(namespace)] = weakReference
+            val moduleName = getModulePath(jsFile.virtualFile)
+            modelsMap[namespace] = weakReference
+            modelsMap["${moduleName}:${namespace}"] = weakReference
             modelsPathMap[jsFile.virtualFile.path] = weakReference
-            modelsNameMap[jsFile.name] = weakReference
             println("#Find models namespace=$namespace jsFile=$jsFile")
         }
     }
@@ -138,7 +138,6 @@ class JsService(private val project: Project) {
         val msg = "找到${this.modelsMap.keys.size}个model，共耗时${l}ms"
         println("【loadIndex】 $msg")
         println(this.modelsMap)
-        println(this.modelsPathMap)
         return msg
     }
 
@@ -156,10 +155,30 @@ class JsService(private val project: Project) {
         open fun getInstance(project: Project): JsService {
             return ServiceManager.getService(project, JsService::class.java)
         }
+
         open fun getNamespace(jsFile: JSFile): String {
             val export = PsiTreeUtil.getChildOfType(jsFile, ES6ExportDefaultAssignment::class.java) ?: return ""
             val jsObj = PsiTreeUtil.getChildOfType(export, JSObjectLiteralExpression::class.java) ?: return ""
-            return jsObj.findProperty(NAMESPACE)?.let { it.value?.text } ?: ""
+            return jsObj.findProperty(NAMESPACE)?.value?.text?.let { StringUtilRt.unquoteString(it) } ?: ""
+        }
+
+        open fun getModulePath(file: VirtualFile?): String {
+            if (file == null) return ""
+            var temp: VirtualFile? = file
+            while (true) {
+                val parent = temp?.parent
+                if (parent?.name == PAGES || parent?.name == SRC) {
+                    return if (temp?.name == MODELS) {
+                        parent.path
+                    } else if (temp?.isDirectory == true) {
+                        temp.path
+                    } else {
+                        parent.path
+                    }
+                }
+                temp = parent
+            }
+            return ""
         }
     }
 }
