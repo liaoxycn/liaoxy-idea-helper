@@ -17,7 +17,7 @@ import javax.swing.JPanel
 class JsSettingComponent {
     val panel: JPanel
     private val myText = JBTextField()
-    private val modelIcon = JBCheckBox("启用model图标")
+    private val modelIcon = JBCheckBox("启用model专属图标")
     private val enableCheck = JBCheckBox("dispatch导航")
     private val enableLoading = JBCheckBox("loading导航")
 
@@ -42,20 +42,27 @@ class JsSettingComponent {
             modelIcon.isSelected = value
         }
 
+    var jsService = JsService.getInstance(ProjectUtils.currProject)
+
     init {
         val jbLabel = JBLabel("")
         val jButton = JButton("扫描models")
         jButton.addActionListener {
-            val jsService = JsService.getInstance(ProjectUtils.currProject)
             val msg = jsService.loadModelsIndex()
 
             jbLabel.text = msg
+        }
+        if (!jsService.isUmi) {
+            jButton.isEnabled = false
+            modelIcon.isEnabled = false
+            enableCheck.isEnabled = false
+            enableLoading.isEnabled = false
         }
 
         enableLoading.isEnabled = false
         panel = FormBuilder.createFormBuilder()
                 .addLabeledComponent(
-                        JBLabel("当前项目："),
+                        JBLabel("当前项目(${if (jsService.isUmi) "Umi" else "非Umi"})："),
                         JBLabel("${ProjectUtils.currProject?.name}"), 1, false
                 )
                 .addSeparator()

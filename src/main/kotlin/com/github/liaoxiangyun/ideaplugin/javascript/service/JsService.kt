@@ -15,11 +15,15 @@ import com.intellij.openapi.util.text.StringUtilRt
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
+import com.intellij.psi.util.PsiTreeUtil
+import java.lang.ref.WeakReference
 
 class JsService(private val project: Project) {
     //是否umi项目
-    private var isUmi: Boolean = false
-    private val modelsMap: MutableMap<String, JSFile> = mutableMapOf()
+    var isUmi: Boolean = false
+    val modelsMap: MutableMap<String, WeakReference<JSFile>> = mutableMapOf()
+    val modelsPathMap: MutableMap<String, WeakReference<JSFile>> = mutableMapOf()
+    val modelsNameMap: MutableMap<String, WeakReference<JSFile>> = mutableMapOf()
     private val dispatchMap: MutableMap<String, MutableSet<PsiElement>> = mutableMapOf()
     private var time: Long = 0
 
@@ -29,8 +33,10 @@ class JsService(private val project: Project) {
         loadModelsIndex()
     }
 
-    fun getModelsMap(): MutableMap<String, JSFile> {
-        return modelsMap;
+    fun clearMap() {
+        modelsMap.clear()
+        modelsPathMap.clear()
+        modelsNameMap.clear()
     }
 
     fun addDispatch(dispatch: Dispatch) {
@@ -45,12 +51,12 @@ class JsService(private val project: Project) {
     }
 
     fun getJSFile(namespace: String): JSFile? {
-        return modelsMap[namespace]
+        return modelsMap[namespace]?.get()
     }
 
     private fun searchModelsDir(dir: PsiDirectory) {
         for (child in dir.subdirectories) {
-            if (child.name == models) {
+            if (child.name == MODELS) {
                 println("#Dir  P:${dir.name}  T:y  C:${child.name}")
                 searchModelJSFile(child)
             } else if (!child.name.startsWith(".")) {
@@ -67,55 +73,37 @@ class JsService(private val project: Project) {
                 searchModelJSFile(child)
             } else if (child is JSFile) {
                 println("#JSFile  P:${dir.name}  T:js   C:${child.name}")
-                addModelJSFile(child)
+                addModelJSFile2(child)
             } else {
                 println("#JSFile  P:${dir.name}  T:other   C:${child}")
             }
         }
     }
 
-    private fun addModelJSFile(jsFile: JSFile) {
-        for (child in jsFile.children) {
-            if (child is ES6ExportDefaultAssignment) { //是否 export default
-                for (child in child.children) {
-                    if (child is JSObjectLiteralExpression) {
-                        val jsObj = child
-                        val namespace = jsObj.findProperty(NAMESPACE) ?: return
-                        jsObj.findProperty(STATE) ?: return
-                        jsObj.findProperty(EFFECTS) ?: return
-                        jsObj.findProperty(REDUCERS) ?: return
-                        val text = namespace.value?.text
-                        if (text != null) {
-                            modelsMap[StringUtilRt.unquoteString(text)] = jsFile
-                            println("#Find models namespace=$text jsFile=$jsFile")
-                            continue
-                        }
-                    }
-                }
-            }
+
+    private fun addModelJSFile2(jsFile: JSFile) {
+        val namespace = getNamespace(jsFile)
+        if (namespace.isNotBlank()) {
+            val weakReference = WeakReference(jsFile)
+            modelsMap[StringUtilRt.unquoteString(namespace)] = weakReference
+            modelsPathMap[jsFile.virtualFile.path] = weakReference
+            modelsNameMap[jsFile.name] = weakReference
+            println("#Find models namespace=$namespace jsFile=$jsFile")
         }
     }
 
     open fun getModelsFunc(jsFile: JSFile?, func: String): PsiElement? {
         if (jsFile == null) return null
-        for (li in jsFile.children) {
-            if (li is ES6ExportDefaultAssignment) { //是否 export default
-                for (exportParam in li.children) {
-                    if (exportParam is JSObjectLiteralExpression) {
-                        for (jsP in exportParam.children) {
-                            if (jsP is JSPropertyImpl) {
-                                if (jsP.name == EFFECTS || jsP.name == REDUCERS) {
-                                    val jsExpression = jsP.value ?: return null
-                                    if (jsExpression is JSObjectLiteralExpressionImpl) {
-                                        for (functionP in jsExpression.children) {
-                                            if (functionP is JSFunctionProperty) {
-                                                if (functionP.name == func) {
-                                                    return functionP
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+        val export = PsiTreeUtil.getChildOfType(jsFile, ES6ExportDefaultAssignment::class.java) ?: return null
+        val jsObj = PsiTreeUtil.getChildOfType(export, JSObjectLiteralExpression::class.java) ?: return null
+        for (jsP in PsiTreeUtil.getChildrenOfType(jsObj, JSPropertyImpl::class.java)) {
+            if (jsP.name == EFFECTS || jsP.name == REDUCERS) {
+                val jsExpression = jsP.value ?: return null
+                if (jsExpression is JSObjectLiteralExpressionImpl) {
+                    for (functionP in jsExpression.children) {
+                        if (functionP is JSFunctionProperty) {
+                            if (functionP.name == func) {
+                                return functionP
                             }
                         }
                     }
@@ -130,18 +118,18 @@ class JsService(private val project: Project) {
         val dumb = DumbService.getInstance(project).isDumb
         println("#loadIndex project=${project.name} dumb=$dumb")
         if (!dumb) {
-            modelsMap.clear()
+            this.clearMap()
             val virtualFile = project.guessProjectDir() ?: return ""
             val directory = PsiManager.getInstance(project).findDirectory(virtualFile!!) ?: return ""
-            val src = directory.findSubdirectory(src) ?: return ""
-            directory.findFile(umirc) ?: return ""
+            val src = directory.findSubdirectory(SRC) ?: return ""
+            directory.findFile(UMI_CON) ?: return ""
             isUmi = true
 
-            val models = src.findSubdirectory(models)
+            val models = src.findSubdirectory(MODELS)
             if (models != null) {
                 searchModelJSFile(models)
             }
-            val pages = src.findSubdirectory(pages)
+            val pages = src.findSubdirectory(PAGES)
             if (pages != null) {
                 searchModelsDir(pages)
             }
@@ -150,21 +138,28 @@ class JsService(private val project: Project) {
         val msg = "找到${this.modelsMap.keys.size}个model，共耗时${l}ms"
         println("【loadIndex】 $msg")
         println(this.modelsMap)
+        println(this.modelsPathMap)
         return msg
     }
 
     companion object {
         private const val REDUCERS: String = "reducers"
+        private const val SUBSCRIPTIONS: String = "subscriptions"
         private const val EFFECTS: String = "effects"
         private const val STATE: String = "state"
         private const val NAMESPACE: String = "namespace"
-        private const val models: String = "models"
-        private const val pages: String = "pages"
-        private const val src: String = "src"
-        private const val umirc: String = ".umirc.js"
+        private const val MODELS: String = "models"
+        private const val PAGES: String = "pages"
+        private const val SRC: String = "src"
+        private const val UMI_CON: String = ".umirc.js"
 
         open fun getInstance(project: Project): JsService {
             return ServiceManager.getService(project, JsService::class.java)
+        }
+        open fun getNamespace(jsFile: JSFile): String {
+            val export = PsiTreeUtil.getChildOfType(jsFile, ES6ExportDefaultAssignment::class.java) ?: return ""
+            val jsObj = PsiTreeUtil.getChildOfType(export, JSObjectLiteralExpression::class.java) ?: return ""
+            return jsObj.findProperty(NAMESPACE)?.let { it.value?.text } ?: ""
         }
     }
 }
