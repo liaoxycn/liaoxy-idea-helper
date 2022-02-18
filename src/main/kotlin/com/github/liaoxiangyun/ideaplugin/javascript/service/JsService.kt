@@ -8,6 +8,7 @@ import com.intellij.lang.javascript.psi.JSObjectLiteralExpression
 import com.intellij.lang.javascript.psi.impl.JSObjectLiteralExpressionImpl
 import com.intellij.lang.javascript.psi.impl.JSPropertyImpl
 import com.intellij.openapi.components.ServiceManager
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
@@ -22,6 +23,7 @@ import java.lang.ref.WeakReference
 class JsService(private val project: Project) {
     //是否umi项目
     var isUmi: Boolean = false
+    var total: Int = 0
     val modelsMap: MutableMap<String, WeakReference<JSFile>> = mutableMapOf()
     val modelsPathMap: MutableMap<String, WeakReference<JSFile>> = mutableMapOf()
     private val dispatchMap: MutableMap<String, MutableSet<PsiElement>> = mutableMapOf()
@@ -34,6 +36,7 @@ class JsService(private val project: Project) {
     }
 
     fun clearMap() {
+        total = 0
         modelsMap.clear()
         modelsPathMap.clear()
     }
@@ -50,7 +53,8 @@ class JsService(private val project: Project) {
     }
 
     fun getJSFileBy(key: String): JSFile? {
-        return modelsMap[key]?.get()
+        val ref = modelsMap[key]
+        return ref?.get()
     }
 
     private fun searchModelsDir(dir: PsiDirectory) {
@@ -88,6 +92,7 @@ class JsService(private val project: Project) {
             modelsMap[namespace] = weakReference
             modelsMap["${moduleName}:${namespace}"] = weakReference
             modelsPathMap[jsFile.virtualFile.path] = weakReference
+            total++
             println("#Find models namespace=$namespace jsFile=$jsFile")
         }
     }
@@ -113,32 +118,45 @@ class JsService(private val project: Project) {
         return null
     }
 
+    private fun loadloadModelsIndexBy(dir: PsiDirectory?) {
+        val src = dir?.findSubdirectory(SRC) ?: return
+        val models = src.findSubdirectory(MODELS)
+        if (models != null) {
+            searchModelJSFile(models)
+        }
+        val pages = src.findSubdirectory(PAGES)
+        if (pages != null) {
+            searchModelsDir(pages)
+        }
+    }
+
     fun loadModelsIndex(): String {
-        val s = System.currentTimeMillis();
         val dumb = DumbService.getInstance(project).isDumb
         println("#loadIndex project=${project.name} dumb=$dumb")
         if (!dumb) {
+            val s = System.currentTimeMillis()
             this.clearMap()
+            val psiManager = PsiManager.getInstance(project)
             val virtualFile = project.guessProjectDir() ?: return ""
-            val directory = PsiManager.getInstance(project).findDirectory(virtualFile!!) ?: return ""
-            val src = directory.findSubdirectory(SRC) ?: return ""
+            val directory = psiManager.findDirectory(virtualFile) ?: return ""
             directory.findFile(UMI_CON) ?: return ""
             isUmi = true
+            loadloadModelsIndexBy(directory)
 
-            val models = src.findSubdirectory(MODELS)
-            if (models != null) {
-                searchModelJSFile(models)
+            val modules = ModuleManager.getInstance(project).modules.filter { it.name != virtualFile.name }
+            for (module in modules) {
+                if (!(module.isLoaded && !module.isDisposed)) return continue
+                val moduleFile = module.moduleFile ?: continue
+                val directory1 = psiManager.findDirectory(moduleFile.parent) ?: continue
+                loadloadModelsIndexBy(directory1)
             }
-            val pages = src.findSubdirectory(PAGES)
-            if (pages != null) {
-                searchModelsDir(pages)
-            }
+            val l = System.currentTimeMillis() - s
+            val msg = "找到${this.total}个model，共耗时${l}ms"
+            println("【loadIndex】 $msg")
+            println(this.modelsMap)
+            return msg
         }
-        val l = System.currentTimeMillis() - s
-        val msg = "找到${this.modelsMap.keys.size}个model，共耗时${l}ms"
-        println("【loadIndex】 $msg")
-        println(this.modelsMap)
-        return msg
+        return ""
     }
 
     companion object {
