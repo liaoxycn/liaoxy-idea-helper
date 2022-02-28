@@ -15,8 +15,9 @@ class HttpHelper {
 
     private var origin = "http://zentaopro.szewec.com"
 
-    private val cookieTemplate = "zentaosid=%s"
-    private val loginTemplate = "/index.php?m=user&f=login&referer="
+
+    private val cookie2 = "; pagerMyTask=200; pagerMyBug=200; lang=zh-cn; keepLogin=on"
+    private val cookieTemplate = "zentaosid=%s$cookie2"
 
 
     private var getSessionUrl = "/index.php?m=api&f=getSessionID&t=json"
@@ -42,7 +43,10 @@ class HttpHelper {
     init {
         settings = AppSettingsState.instance
         origin = settings.origin.trim { it <= '/' }
-        cookie = settings.cookie.trim()
+        cookie = settings.cookie.trim { it == ' ' || it == ';' }
+        if (!cookie.contains("pagerMyTask")) {
+            cookie += cookie2
+        }
     }
 
     private fun httpGetJSON(url: String, checkLogin: Boolean): Resp {
@@ -77,16 +81,18 @@ class HttpHelper {
     }
 
     open fun getBugList(): ArrayList<Bug> {
-        val resp = httpGetJSON(origin + bugUrl + otherQuery, true)
+        val resp = httpGetJSON(origin + bugUrl, true)
         println("resp status=${gson.toJson(resp.status)}")
         val myTodo = gson.fromJson(resp.data, MyTodo::class.java)
+        println("bugs =${myTodo.bugs}")
         return myTodo.bugs
     }
 
     open fun getTaskList(): ArrayList<Task> {
-        var resp = httpGetJSON(origin + taskUrl + otherQuery, true)
+        var resp = httpGetJSON(origin + taskUrl, true)
         println("resp status=${gson.toJson(resp.status)}")
         val myTodo = gson.fromJson(resp.data, MyTodo::class.java)
+        println("tasks =${myTodo.tasks}")
         return myTodo.tasks
     }
 
