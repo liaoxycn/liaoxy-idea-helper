@@ -16,7 +16,7 @@ class MainSettingComponent {
         get() = myText
 
     init {
-        val jbLabel = JBLabel("1.1.3")
+        val jbLabel = JBLabel("1.1.4")
         panel = FormBuilder.createFormBuilder()
                 .addLabeledComponent(JBLabel("版本："), jbLabel, 1, false)
                 .addComponentFillVertically(JPanel(), 0)

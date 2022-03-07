@@ -231,11 +231,11 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
             run {
                 if (e.stateChange == ItemEvent.SELECTED) {
                     val s = changeScope?.selectedItem as String
-                    val matcher = Pattern.compile("#\\d+(.*?) 需求#(\\d*?)(.*)").matcher(s)
+                    val matcher = Pattern.compile("任务#\\d+(.*?)需求#(\\d*)(.*)").matcher(s)
                     if (matcher.find()) {
                         val desc = matcher.group(1)?.trim()
                         val storyID = matcher.group(2).trim()
-                        val storyTitle = matcher.group(3)
+                        val storyTitle = matcher.group(3).trim()
                         textField1?.text = desc
                         comboBox2?.text = storyID
                         if (settings.q1) {
@@ -257,7 +257,7 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
             run {
                 if (e.stateChange == ItemEvent.SELECTED) {
                     val s = comboBox1?.selectedItem as String
-                    val matcher = Pattern.compile("#\\d+(.*)").matcher(s)
+                    val matcher = Pattern.compile("Bug#\\d+(.*)").matcher(s)
                     if (matcher.find()) {
                         val desc = matcher.group(1)?.trim()
                         textField6?.text = desc
