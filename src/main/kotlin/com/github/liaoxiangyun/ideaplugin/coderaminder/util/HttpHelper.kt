@@ -1,31 +1,50 @@
 package com.github.liaoxiangyun.ideaplugin.coderaminder.util
 
 import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant
-import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant.Companion.PATTERN_M
-import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant.Companion.sdf
-import com.github.liaoxiangyun.ideaplugin.coderaminder.model.GitRecord
+import com.github.liaoxiangyun.ideaplugin.coderaminder.model.GitSummary
+import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.Branch
+import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.CommitDetail
+import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.CommitRecord
+import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.Project
 import com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsState
 import com.google.gson.Gson
-import com.google.gson.JsonObject
-import com.intellij.ui.SystemNotifications
+import com.google.gson.reflect.TypeToken
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
 import java.io.IOException
-import java.util.*
+import java.time.LocalDateTime
+import java.util.stream.Collectors
 
 
 class HttpHelper {
 
-    private var origin = "http://gitlab.szewec.com/e.liaoxiangyun"
-    private var session = "session"
-    private var enableStatus = false
-    private var days = 1
-    private var minutes: List<List<Int>> = listOf(listOf())
-    private var taskUrl = "?limit=20&offset=0"
+    private var settings: CodeSettingsState? = null
+    private val gson: Gson = Gson()
+    private var origin = "http://gitlab.szewec.com/"
+    private var branches = arrayListOf<String>()
+
+    //第一步，生成私钥
+    private var token = ""
+
+    //第二步，获取当前用户可见的所有项目（即使用户不是成员）
+    //接口地址：gitlab的地址/api/v4/projects/?private_token=xxx
+    private var url_projects = "/api/v4/projects"
+
+    //    第三步，遍历项目，根据项目id获取分支列表
+//    接口地址：http://gitlab地址/api/v4/projects/项目id/repository/branches?private_token=xxx
+    private var url_branches = "/api/v4/projects/{项目id}/repository/branches"
+
+    //    第四步，遍历分支，根据分支name获取commits
+//    注意，当title或message首单词为Merge，表示合并操作，剔除此代码量
+//    接口地址：
+//    http://gitlab地址/api/v4/projects/项目id/repository/commits?ref_name=master&private_token=xxx
+    private var url_commits = "/api/v4/projects/{项目id}/repository/commits?ref_name={master}&since={since}"
+
+    //    第五步，根据commits的id获取代码量
+//    接口地址:
+//    http://gitlab地址/api/v4/projects/项目id/repository/commits/commits的id?private_token=xxx
+    private var url_commits_detail = "/api/v4/projects/{项目id}/repository/commits/{commitsId}"
 
     companion object {
         val httpClient: OkHttpClient = OkHttpClient.Builder()
@@ -35,42 +54,18 @@ class HttpHelper {
 
     init {
         val settings = CodeSettingsState.instance
-        println(settings.toString())
-        try {
-            days = Integer.valueOf(settings.days) ?: 1
-            if (days <= 0) {
-                days = 0
-            }
-        } catch (e: Exception) {
-            days = 1
-        }
+        this.settings = settings
         origin = settings.origin
-        session = settings.session
-        val time = settings.reTimeStr
-        val split = time.split("-").filter { PATTERN_M.matcher(it).matches() }.map {
-            val split = it.split(":")
-            listOf(Integer.valueOf(split[0]), Integer.valueOf(split[1]))
-        }
-        minutes = split
-        enableStatus = settings.enableStatus
+        token = settings.token
+        branches = settings.branches.split("|").map { it.trim() } as ArrayList<String>
+
     }
 
     private fun getHtml(url: String): String {
         val httpUrl = url.toHttpUrl()
-        println("========= getHtml")
         println(httpUrl)
-        println(httpUrl.host)
         val get: Request.Builder = Request.Builder().url(httpUrl)
-                .addHeader("Accept", "application/json, text/javascript, */*; q=0.01") //Accept: text/htm,application/xhtml+:xml,application/xml;g=0.9,image/webp,image/apng,*/*;g=0.8,application/signed-exchange;,r=b3;q=0.9
-
-                .addHeader("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")//Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
-
-//                .addHeader("Connection", "Keep-Alive") //Connection: Keep-Alive
-                .addHeader("Cookie", "_gitlab_session=${session}") //Connection: Keep-Alive
-                .addHeader("Host", httpUrl.host) //Connection: Keep-Alive
-                .addHeader("User-Agent", "Mozilla/5.0 (Windows NF 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36 Edg/88.0.705.50") //User-Agent: Mozilla/5.0 (Windows NF 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36 Edg/88.0.705.50
-
-                .addHeader("X-Requested-With", "XMLHttpRequest") //
+                .addHeader("PRIVATE-TOKEN", token)
                 .get()
         val request: Request = get.build()
         httpClient.newCall(request).execute().use { response ->
@@ -83,87 +78,98 @@ class HttpHelper {
         }
     }
 
-    private fun getItem(itemDiv: Element?): GitRecord? {
-        if (itemDiv == null) {
-            println("item is null")
-            return null
-        }
-        val gitRecord = GitRecord()
 
-        var datetime = itemDiv.selectFirst(".event-item-timestamp time")?.attr("datetime")
-        datetime?.replace(Regex("[TZ]"), " ")?.trim()?.let { gitRecord.datetime = Date(sdf.parse(it).time + (8 * 1000 * 3600)) }
+    fun getSummary(): GitSummary {
+        val gitSummary = GitSummary()
 
-        itemDiv.selectFirst(".event-title .author_name")?.text()?.trim()?.let { gitRecord.authorName = it }
+        val now = LocalDateTime.now()
+        val toDayEpochDay = now.toLocalDate().toEpochDay()
 
-        itemDiv.selectFirst(".event-title strong")?.text()?.trim()?.let { gitRecord.branch = it }
+        var days = arrayListOf<GitSummary.Day>()
+        var commits = arrayListOf<GitSummary.Commit>()
 
-        itemDiv.selectFirst(".project-name")?.text()?.trim()?.let { gitRecord.projectName = it }
-
-
-        return gitRecord
-    }
-
-    fun getGitRecordList(): ArrayList<GitRecord> {
-        var arr: ArrayList<GitRecord> = arrayListOf()
-
-        val now = Date()
-        val calendar = Calendar.getInstance()
-        calendar.time = now
-        val hours = calendar.get(Calendar.HOUR_OF_DAY)
-        val minute = calendar.get(Calendar.MINUTE)
-
-        if (!enableStatus) {
-            println("not in enabled")
-            return arr
-        }
-
-        val any = (hours * 60 + minute) >= (minutes[0][0] * 60 + minutes[0][1])
-                && (hours * 60 + minute) <= (minutes[1][0] * 60 + minutes[1][1])
-        if (!any) {
-            println("now[${hours}:${minute}] not in reTime[${minutes[0][0]}:${minutes[0][1]}-${minutes[1][0]}:${minutes[1][1]}]")
-            return arr
-        } else {
-            println("now[${hours}:${minute}] in reTime[${minutes[0][0]}:${minutes[0][1]}-${minutes[1][0]}:${minutes[1][1]}]")
-        }
-
-        val taskHtml: String = this.getHtml("$origin$taskUrl")
-//        val taskHtml: String = this.getHtml("$origin$taskUrl")
-        val g = Gson()
-        val obj: JsonObject = g.fromJson(taskHtml, JsonObject::class.java)
-        val htmlStr = obj.get("html").asString
-        if (htmlStr == "\\n" || htmlStr.length <= 3) {
-            throw RuntimeException("GitLab Session已失效！")
-        }
-        val document: Document = Jsoup.parse(htmlStr)
-        val items = document.select(".event-block.event-item")
-        println("items.size = ${items.size}")
-        for (item in items) {
-            getItem(document)?.let { arr.add(it) }
-        }
-//        arr.add(GitRecord(sdf.parse("2021-07-09 18:00:00"), "lxy", "project", "develop"))
-
-        if (arr.size > 0) {
-            val gitRecord = arr[0]
-
-            //现在距上一次提交时间差
-            val js = CalendarUtil.js(gitRecord.datetime, now)
-
-            val msg = "最近一次提交是: ${sdf.format(gitRecord.datetime)}, 你已经${js}天未提交代码了, 请尽快提交代码！"
-            if (js >= days) {
-                SystemNotifications.getInstance().notify("${Constant.setttingName}",
-                        "你已经${js}天未提交代码了", msg)
-                throw RuntimeException(msg)
-            } else {
-                println(msg)
+        val projects = getList<Project>(url_projects)
+        for (project in projects) {
+            val branches = getList<Branch>(url_branches.replace("{项目id}", project.id))
+            for (branch in branches) {
+                if (this.branches.contains(branch.name)) {
+                    val commitRecords = getList<CommitRecord>(url_commits.replace("{项目id}", project.id)
+                            .replace("{master}", branch.name))
+                    for (record in commitRecords) {
+                        val detail = getObj<CommitDetail>(url_commits_detail.replace("{项目id}", project.id)
+                                .replace("{commitsId}", record.id)
+                                .replace("{since}", now.plusDays(-14).format(Constant.FORMATTER)))
+                        val stats = detail.stats
+                        val commit = GitSummary.Commit(detail.id, project.id, project.nameWithNameSpace,
+                                parseTime(detail.committer_date), stats.additions, stats.deletions, stats.total)
+                        commits.add(commit)
+                    }
+                }
             }
         }
-        return arr
+
+
+        //以每天分组
+        val epochDayMap = commits.stream().collect(Collectors.groupingBy(GitSummary.Commit::epochDay))
+        var epochDayDataMap = mutableMapOf<Long, GitSummary.Day>()
+
+        for (entry in epochDayMap.entries) {
+            val epochDay = entry.key
+            val commits = entry.value
+            val sum = commits.stream().mapToInt(GitSummary.Commit::add).sum()
+            val day = GitSummary.Day(commits[0].date, epochDay, sum)
+            days.add(day)
+            epochDayDataMap[epochDay] = day
+        }
+
+        days.sortBy { it.epochDay }
+
+        //统计今日
+        if (epochDayDataMap.containsKey(toDayEpochDay)) {
+            val day = epochDayDataMap[toDayEpochDay]!!
+            gitSummary.today = day.total
+        }
+        //统计本周
+        val weekDays = CalendarUtil.getWeekDays(0)
+        for (weekDay in weekDays) {
+            val day = epochDayDataMap[weekDay.toEpochDay()]
+            if (day != null) {
+                gitSummary.week.and(day.total)
+            }
+        }
+
+        val messages = "今日代码量：${gitSummary.today}" +
+                "本周代码量：${gitSummary.week}"
+        gitSummary.messages = messages
+
+
+        return gitSummary
     }
 
-    private fun getCalendar(date: Date?): Calendar {
-        val calendar = Calendar.getInstance()
-        calendar.time = date ?: Date()
-        return calendar
+    private fun parseTime(date: String): LocalDateTime {
+        val str = date.replace("T", " ").substring(0, 19)
+        return LocalDateTime.parse(str, Constant.FORMATTER)
     }
+
+    private fun <T> getObj(url: String): T {
+        val html = getHtml(origin + url)
+        if (html.startsWith("{\n    \"message")) {
+            RuntimeException(html)
+        }
+        return gson.fromJson(html, object : TypeToken<T>() {}.type)
+    }
+
+    private fun <T> getList(url: String): List<T> {
+        val html = getHtml(origin + url)
+        if (html.startsWith("{\n    \"message")) {
+            RuntimeException(html)
+        }
+        return gson.fromJson(html, object : TypeToken<T>() {}.type)
+    }
+
+    private fun <T> jsonToList(jsonList: String): List<T> {
+        return gson.fromJson(jsonList, object : TypeToken<ArrayList<T>>() {}.type)
+    }
+
 
 }

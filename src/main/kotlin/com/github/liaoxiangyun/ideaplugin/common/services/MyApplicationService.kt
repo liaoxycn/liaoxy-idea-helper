@@ -10,12 +10,13 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.util.concurrency.AppExecutorUtil
 import java.io.Closeable
+import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
 
 class MyApplicationService : Closeable {
-    private var schedule: ScheduledFuture<*>? = null
+    private var executorService: ScheduledExecutorService = AppExecutorUtil.getAppScheduledExecutorService()
 
     init {
         println("【MyApplicationService,,】 init")
@@ -24,15 +25,14 @@ class MyApplicationService : Closeable {
 
     private fun execTask() {
         println("#MyApplicationService execTask")
-        schedule = AppExecutorUtil.getAppScheduledExecutorService().schedule({
+        executorService.schedule({
             codingReminderTask()
 //            jsTask()
         }, 1, TimeUnit.MINUTES)
     }
 
     override fun close() {
-        val cancel = schedule?.cancel(true)
-        println("#MyApplicationService close=$cancel")
+        executorService.shutdownNow()
     }
 
     private fun jsTask() {
@@ -48,14 +48,14 @@ class MyApplicationService : Closeable {
 
     private fun codingReminderTask() {
         try {
-            c1--
-            if (c1 > 0) {
-                return
-            }
-            println("codingReminder")
-            val gitRecords = HttpHelper().getGitRecordList()
-            println(gitRecords)
-            c1 = CodeSettingsState.instance.getRate()
+//            c1--
+//            if (c1 > 0) {
+//                return
+//            }
+//            println("codingReminder")
+//            val gitRecords = HttpHelper().getGitRecordList()
+//            println(gitRecords)
+//            c1 = CodeSettingsState.instance.getRate()
         } catch (e: Exception) {
             try {
                 Notify.showErrorNotification(
