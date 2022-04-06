@@ -1,8 +1,6 @@
 package com.github.liaoxiangyun.ideaplugin.common.services
 
 import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant
-import com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsState
-import com.github.liaoxiangyun.ideaplugin.coderaminder.util.HttpHelper
 import com.github.liaoxiangyun.ideaplugin.common.util.Notify
 import com.github.liaoxiangyun.ideaplugin.common.util.ProjectUtils
 import com.github.liaoxiangyun.ideaplugin.javascript.service.JsService
@@ -11,7 +9,6 @@ import com.intellij.openapi.components.ServiceManager
 import com.intellij.util.concurrency.AppExecutorUtil
 import java.io.Closeable
 import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
 
@@ -32,7 +29,10 @@ class MyApplicationService : Closeable {
     }
 
     override fun close() {
-        executorService.shutdownNow()
+        try {
+            executorService.shutdownNow()
+        } catch (e: Exception) {
+        }
     }
 
     private fun jsTask() {
