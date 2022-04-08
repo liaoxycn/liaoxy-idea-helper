@@ -1,5 +1,9 @@
 package com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab
 
+import cn.hutool.json.JSONUtil
+import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant
+import java.time.LocalDateTime
+
 /**
  * 提交记录
  */
@@ -30,6 +34,20 @@ open class CommitRecord {
             return true
         }
         return false
+    }
+
+    open fun getTime(): LocalDateTime {
+        var str = ""
+        if (this.created_at?.length > 19) {
+            str = this.created_at.replace("T", " ").substring(0, 19)
+        } else if (this.committer_date?.length > 19) {
+            str = this.committer_date.replace("T", " ").substring(0, 19)
+        } else if (this.authored_date?.length > 19) {
+            str = this.authored_date.replace("T", " ").substring(0, 19)
+        } else {
+            println(JSONUtil.toJsonStr(this))
+        }
+        return LocalDateTime.parse(str, Constant.FORMATTER)
     }
 
 }

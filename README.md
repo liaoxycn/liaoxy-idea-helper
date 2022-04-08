@@ -6,9 +6,9 @@
 
 ## Todo List
 
-- [x] Git commit template （Git 提交模板）
-- [x] Code submission reminder （代码提交提醒）
-- [x] React umi dispatch navigation （umi dispatch 导航）
+- [ ] Git commit template （Git 提交模板）
+- [ ] Code statistics （代码统计）
+- [ ] React umi dispatch navigation （umi dispatch 跳转）
 - [ ] Code Template （代码模版）
 
 <!-- Plugin description -->

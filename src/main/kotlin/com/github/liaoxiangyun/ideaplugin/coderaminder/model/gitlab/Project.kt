@@ -5,7 +5,7 @@ package com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab
  */
 class Project {
     var id: String = ""
-    var desc: String = ""
+    var description: String = ""
     var name: String = ""
     var nameWithNameSpace: String = ""
 }

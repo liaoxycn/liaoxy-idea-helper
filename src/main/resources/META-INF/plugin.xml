@@ -57,7 +57,7 @@
         <applicationConfigurable parentId="liaoxy-helper"
                                  instance="com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsConfigurable"
                                  id="com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsConfigurable"
-                                 displayName="代码提交提醒"/>
+                                 displayName="代码量统计"/>
 
         <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.common.services.ProjectOpened"/>
         <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.javascript.service.JsService"/>
@@ -81,11 +81,17 @@
     <actions>
         <group id="LoxHelperMenu" text="IDEA助手">
             <add-to-group group-id="MainMenu"/>
+            <separator/>
             <!-- javascript -->
-            <action id="JavascriptModelsMenu" class="com.github.liaoxiangyun.ideaplugin.javascript.action.ModelsAction"
+            <action id="JavascriptModelsMenu" class="com.github.liaoxiangyun.ideaplugin.javascript.action.CodeStatisticsAction"
                     text="扫描 models">
             </action>
+            <separator/>
             <!-- javascript -->
+
+            <action id="CodeStatistics" class="com.github.liaoxiangyun.ideaplugin.javascript.action.CodeStatisticsAction"
+                    text="代码量统计">
+            </action>
             <separator/>
         </group>
 

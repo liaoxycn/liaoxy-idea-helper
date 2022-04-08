@@ -1,10 +1,12 @@
 package com.github.liaoxiangyun.ideaplugin.coderaminder.settings
 
+import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.XmlSerializerUtil
+import org.gitlab.api.models.GitlabUser
 
 /**
  * Supports storing the application settings in a persistent way.
@@ -39,11 +41,13 @@ class CodeSettingsState : PersistentStateComponent<CodeSettingsState> {
      * 每日报告
      */
     var dailyReport = true
+
     /**
      * 每周报告
      */
     var weeklyReport = true
 
+    var gitlabUser: GitlabUser = GitlabUser()
 
 
     override fun getState(): CodeSettingsState {

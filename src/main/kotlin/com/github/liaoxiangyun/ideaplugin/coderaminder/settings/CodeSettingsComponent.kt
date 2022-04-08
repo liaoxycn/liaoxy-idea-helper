@@ -1,7 +1,9 @@
 package com.github.liaoxiangyun.ideaplugin.coderaminder.settings
 
+import cn.hutool.json.JSONUtil
 import com.github.liaoxiangyun.ideaplugin.coderaminder.util.HttpHelper
 import com.github.liaoxiangyun.ideaplugin.common.util.ProjectUtils
+import com.intellij.openapi.ui.Messages
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextArea
@@ -82,9 +84,11 @@ class CodeSettingsComponent {
         val jbLabel = JBLabel("")
         val jButton = JButton("统计")
         jButton.addActionListener {
-            val msg = ""
-            val summary = HttpHelper().getSummary()
-            jbLabel.text = summary.messages
+            val summary = HttpHelper().getSummary2()
+            println("summary =======================================\n ${JSONUtil.toJsonStr(summary)}")
+//            jbLabel.text = summary.messages
+            val title = "日均代码量统计结果（数据来自Gitlab）"
+            Messages.showMessageDialog(ProjectUtils.currProject, summary.messages, title, Messages.getInformationIcon())
         }
         panel = FormBuilder.createFormBuilder()
                 .addLabeledComponent(
@@ -98,7 +102,7 @@ class CodeSettingsComponent {
                 .addLabeledComponent(JBLabel(" TOKEN"), token, 1, false)
                 .addSeparator()
                 .addLabeledComponent(JBLabel("配置："), JBLabel(), 1, false)
-                .addLabeledComponent(JBLabel(" 统计分支"), scrollPane, 1, false)
+                .addLabeledComponent(JBLabel(" 统计分支"), branches, 1, false)
                 .addLabeledComponent(JBLabel(" 公休日历"), scrollPane, 1, false)
                 .addLabeledComponent(JBLabel(" 提醒时间"), reTime, 1, false)
                 .addComponent(dailyReport)

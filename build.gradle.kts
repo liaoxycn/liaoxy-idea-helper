@@ -36,6 +36,11 @@ dependencies {
     implementation("org.jsoup:jsoup:1.13.1")
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
     implementation("com.google.code.gson:gson:2.8.7")
+    //
+    implementation("cn.hutool:hutool-all:5.4.7")
+    // https://mvnrepository.com/artifact/org.gitlab/java-gitlab-api
+    implementation("org.gitlab:java-gitlab-api:4.1.1")
+
     implementation("com.squareup.okhttp3:okhttp:4.9.1")
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.17.1")
 }

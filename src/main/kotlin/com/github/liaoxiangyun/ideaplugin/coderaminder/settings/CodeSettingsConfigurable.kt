@@ -2,6 +2,7 @@ package com.github.liaoxiangyun.ideaplugin.coderaminder.settings
 
 import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant
 import com.intellij.openapi.options.Configurable
+import org.gitlab.api.GitlabAPI
 import org.jetbrains.annotations.Nls
 import javax.swing.JComponent
 
@@ -52,6 +53,19 @@ class CodeSettingsConfigurable : Configurable {
         settings.enableStatus = mySettingsComponent!!.enableStatus
         settings.dailyReport = mySettingsComponent!!.dailyReportStatus
         settings.weeklyReport = mySettingsComponent!!.weeklyReportStatus
+
+        println("apply token")
+        httpGet(mySettingsComponent!!.originText, mySettingsComponent!!.tokenText)
+    }
+
+    private fun httpGet(origin: String, token: String) {
+        val settings = CodeSettingsState.instance
+        try {
+            val gitlabAPI = GitlabAPI.connect(origin, token)
+            settings.gitlabUser = gitlabAPI.user
+            println(settings.gitlabUser)
+        } catch (e: Exception) {
+        }
     }
 
     override fun reset() {
