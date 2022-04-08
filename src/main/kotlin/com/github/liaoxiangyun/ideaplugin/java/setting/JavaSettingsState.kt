@@ -1,4 +1,4 @@
-package com.github.liaoxiangyun.ideaplugin.javascript.setting
+package com.github.liaoxiangyun.ideaplugin.java.setting
 
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.ServiceManager
@@ -11,24 +11,23 @@ import com.intellij.util.xmlb.XmlSerializerUtil
  * The [State] and [Storage] annotations define the name of the data and the file name where
  * these persistent application settings are stored.
  */
-@State(name = "com.github.liaoxiangyun.ideaplugin.js.settings.JsSettingsState", storages = [Storage("JsSettingsState.xml")])
-class JsSettingsState : PersistentStateComponent<JsSettingsState> {
-    var enableStatus = false
-    var enableLoadingStatus = false
-    var modelIcon = false
+@State(name = "com.github.liaoxiangyun.ideaplugin.java.setting.SettingsState", storages = [Storage("JavaSettingsState.xml")])
+class JavaSettingsState : PersistentStateComponent<JavaSettingsState> {
+    var ewEnable = false
 
-    override fun getState(): JsSettingsState {
+
+    override fun getState(): JavaSettingsState {
         return this
     }
 
-    override fun loadState(state: JsSettingsState) {
+    override fun loadState(state: JavaSettingsState) {
         XmlSerializerUtil.copyBean(state, this)
     }
 
 
     companion object {
-        val instance: JsSettingsState
-            get() = ServiceManager.getService(JsSettingsState::class.java)
+        val instance: JavaSettingsState
+            get() = ServiceManager.getService(JavaSettingsState::class.java)
     }
 
 }

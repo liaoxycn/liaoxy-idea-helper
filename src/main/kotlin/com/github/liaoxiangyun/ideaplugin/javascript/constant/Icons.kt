@@ -9,5 +9,7 @@ interface Icons {
             get() = IconLoader.getIcon("/images/down.png")
         val up: Icon
             get() = IconLoader.getIcon("/images/up.png")
+        val model: Icon
+            get() = IconLoader.getIcon("/icons/medium-circle-fill.svg")
     }
 }

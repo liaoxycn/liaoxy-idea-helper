@@ -2,6 +2,7 @@ package com.github.liaoxiangyun.ideaplugin.coderaminder.settings
 
 import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant
 import com.intellij.openapi.options.Configurable
+import org.gitlab.api.GitlabAPI
 import org.jetbrains.annotations.Nls
 import javax.swing.JComponent
 
@@ -31,11 +32,13 @@ class CodeSettingsConfigurable : Configurable {
         val settings = CodeSettingsState.instance
         var modified = mySettingsComponent!!.userNameText != settings.userId
         modified = modified or (mySettingsComponent!!.originText != settings.origin)
-        modified = modified or (mySettingsComponent!!.sessionText != settings.session)
-        modified = modified or (mySettingsComponent!!.daysText != settings.days)
-        modified = modified or (mySettingsComponent!!.reTimeText != settings.reTimeStr)
-        modified = modified or (mySettingsComponent!!.rateText != settings.rateStr)
+        modified = modified or (mySettingsComponent!!.tokenText != settings.token)
+        modified = modified or (mySettingsComponent!!.calendarText != settings.calendar)
+        modified = modified or (mySettingsComponent!!.reTimeText != settings.reTime)
+        modified = modified or (mySettingsComponent!!.branchesText != settings.branches)
         modified = modified or (mySettingsComponent!!.enableStatus != settings.enableStatus)
+        modified = modified or (mySettingsComponent!!.dailyReportStatus != settings.dailyReport)
+        modified = modified or (mySettingsComponent!!.weeklyReportStatus != settings.weeklyReport)
         return modified
     }
 
@@ -43,22 +46,39 @@ class CodeSettingsConfigurable : Configurable {
         val settings = CodeSettingsState.instance
         settings.userId = mySettingsComponent!!.userNameText
         settings.origin = mySettingsComponent!!.originText
-        settings.session = mySettingsComponent!!.sessionText
-        settings.days = mySettingsComponent!!.daysText
-        settings.reTimeStr = mySettingsComponent!!.reTimeText
-        settings.rateStr = mySettingsComponent!!.rateText
+        settings.token = mySettingsComponent!!.tokenText
+        settings.calendar = mySettingsComponent!!.calendarText
+        settings.reTime = mySettingsComponent!!.reTimeText
+        settings.branches = mySettingsComponent!!.branchesText
         settings.enableStatus = mySettingsComponent!!.enableStatus
+        settings.dailyReport = mySettingsComponent!!.dailyReportStatus
+        settings.weeklyReport = mySettingsComponent!!.weeklyReportStatus
+
+        println("apply token")
+        httpGet(mySettingsComponent!!.originText, mySettingsComponent!!.tokenText)
+    }
+
+    private fun httpGet(origin: String, token: String) {
+        val settings = CodeSettingsState.instance
+        try {
+            val gitlabAPI = GitlabAPI.connect(origin, token)
+            settings.gitlabUser = gitlabAPI.user
+            println(settings.gitlabUser)
+        } catch (e: Exception) {
+        }
     }
 
     override fun reset() {
         val settings = CodeSettingsState.instance
         mySettingsComponent!!.userNameText = settings.userId
         mySettingsComponent!!.originText = settings.origin
-        mySettingsComponent!!.sessionText = settings.session
-        mySettingsComponent!!.daysText = settings.days
-        mySettingsComponent!!.reTimeText = settings.reTimeStr
-        mySettingsComponent!!.rateText = settings.rateStr
+        mySettingsComponent!!.tokenText = settings.token
+        mySettingsComponent!!.calendarText = settings.calendar
+        mySettingsComponent!!.reTimeText = settings.reTime
+        mySettingsComponent!!.branchesText = settings.branches
         mySettingsComponent!!.enableStatus = settings.enableStatus
+        mySettingsComponent!!.dailyReportStatus = settings.dailyReport
+        mySettingsComponent!!.weeklyReportStatus = settings.weeklyReport
     }
 
     override fun disposeUIResources() {

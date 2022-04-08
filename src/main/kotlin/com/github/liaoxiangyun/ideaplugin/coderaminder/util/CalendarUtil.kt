@@ -1,64 +1,160 @@
 package com.github.liaoxiangyun.ideaplugin.coderaminder.util
 
+import cn.hutool.json.JSONUtil
+import com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsState
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.*
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 
 object CalendarUtil {
     @Throws(ParseException::class)
     @JvmStatic
     fun main(args: Array<String>) {
-        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        val d1 = sdf.parse("2018-12-01 22:20:22")
-        val d2 = sdf.parse("2018-12-31 02:20:22")
-        val js = js(d1, d2)
-        println("天数差是：$js")
+
+        val weekDays = getWeekDays(1)
+        println("weekDays = ${weekDays}")
+
     }
 
-    /**
-     * 计算两个日期的天数差
-     *
-     * @param d1
-     * @param d2
-     * @return
-     */
-    fun js(d1: Date?, d2: Date?): Int {
-        val cal1 = Calendar.getInstance()
-        val cal2 = Calendar.getInstance()
-        //long类型的日期也支持
-//    cal1.setTimeInMillis(long);
-//    cal2.setTimeInMillis(long);
-        cal1.time = d1
-        cal2.time = d2
+    open val calendarMap = mutableMapOf<String, Int>()
 
-        //获取日期在一年(月、星期)中的第多少天
-        val day1 = cal1[Calendar.DAY_OF_YEAR] //第335天
-        val day2 = cal2[Calendar.DAY_OF_YEAR] //第365天
 
-        //获取当前日期所在的年份
-        val year1 = cal1[Calendar.YEAR]
-        val year2 = cal2[Calendar.YEAR]
+    private val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+    open fun format(date: LocalDate): String {
+        return date.format(dateFormat)
+    }
 
-        //如果两个日期的是在同一年，则只需要计算两个日期在一年的天数差；
-        //不在同一年，还要加上相差年数对应的天数，闰年有366天
-        return if (year1 != year2) //不同年
-        {
-            var timeDistance = 0
-            for (i in year1 until year2) {
-                timeDistance += if (i % 4 == 0 && i % 100 != 0 || i % 400 == 0) //闰年
-                {
-                    366
-                } else  //不是闰年
-                {
-                    365
+    open fun isOffDay(localDate: LocalDate): Boolean {
+        val key = localDate.format(dateFormat)
+        if (calendarMap.containsKey(key)) {
+            val i = calendarMap[key]
+            if (i !== 1) {
+                return true
+            }
+        } else {
+            val week: DayOfWeek = localDate.dayOfWeek
+            if (week == DayOfWeek.SATURDAY || week == DayOfWeek.SUNDAY) {
+                return true
+            }
+        }
+        return false
+    }
+
+    open fun getWeekDays(week: Int): ArrayList<LocalDate> {
+        loadData()
+        val now = LocalDate.now()
+        var weekDays = getWeekDays2(now)
+        if (week == 0) {
+            return weekDays
+        }
+        if (week > 0) {
+            for (index in 1..week) {
+                println("#getWeekDays week=$week index=$index")
+                weekDays = getWeekDays2(weekDays.last().plusDays(1))
+            }
+        } else {
+            for (index in 1..-week) {
+                println("#getWeekDays week=$week index=$index")
+                weekDays = getWeekDays2(weekDays.first().plusDays(-1))
+            }
+        }
+        return weekDays
+    }
+
+    private fun getWeekDays2(date: LocalDate): ArrayList<LocalDate> {
+        val list = arrayListOf<LocalDate>()
+        var begin: LocalDate = date
+        var end: LocalDate = date
+        //向前查
+        var max = 10
+        while (true) {
+            val b = isOffDay(begin)
+            val last = begin.plusDays(-1)
+            val b1 = isOffDay(last)
+//            println("$begin b=$b ; last b1=$b1 ; ${if (!b && b1) "r=true" else ""}")
+            if (!b && b1) {
+                break
+            }
+            begin = last
+            if (--max <= 0) {
+                break
+            }
+        }
+        max = 10
+        //向后查
+        while (true) {
+            val b = isOffDay(end)
+            val next = end.plusDays(1)
+            val b1 = isOffDay(next)
+//            println("$end b=$b ; next b1=$b1 ; ${if (b && !b1) "r=true" else ""}")
+            if (b && !b1) {
+                break
+            }
+            end = next
+            if (--max <= 0) {
+                break
+            }
+        }
+        do {
+            list.add(begin)
+            begin = begin.plusDays(1)
+        } while (begin <= end)
+
+        return list
+    }
+
+
+    private fun getContent(path: String): String {
+        val stream = CalendarUtil.javaClass.getResourceAsStream(path)
+
+        val buff = BufferedReader(InputStreamReader(stream))
+        val sb = StringBuffer()
+        var line: String?
+        do {
+            line = buff.readLine()
+            if (line != null) {
+                sb.append(line).append("\n")
+            } else {
+                break
+            }
+        } while (true)
+        return sb.toString()
+    }
+
+
+    private fun <T> getObj(json: String, clazz: Class<T>): T {
+        return JSONUtil.toBean(json, clazz)
+    }
+
+    private fun setMapByJson(str: String): MutableMap<String, Int> {
+        try {
+            if (str.isNotBlank()) {
+                val toObj = getObj(str, Map::class.java)
+                for (entry in toObj) {
+                    for (e in (entry.value as Map<Any, Any>)) {
+                        calendarMap[e.key as String] = e.value.toString().toInt()
+                    }
                 }
             }
-            println(timeDistance + (day2 - day1))
-            timeDistance + (day2 - day1)
-        } else  //同年
-        {
-            println("判断day2 - day1 : " + (day2 - day1))
-            day2 - day1
+        } catch (e: Exception) {
         }
+        return calendarMap
     }
+
+    private fun loadData() {
+        val settingsState = CodeSettingsState.instance
+        if (settingsState.calendar.isBlank()) {
+            settingsState.calendar = getContent("/json/2022.json")
+        }
+        setMapByJson(settingsState.calendar)
+    }
+
+    init {
+        loadData()
+    }
+
 }

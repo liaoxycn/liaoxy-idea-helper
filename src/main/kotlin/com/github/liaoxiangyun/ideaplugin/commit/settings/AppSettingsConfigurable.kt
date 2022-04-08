@@ -36,6 +36,7 @@ class AppSettingsConfigurable : Configurable {
         modified = modified or (mySettingsComponent!!.passwordText != settings.password)
         modified = modified or (mySettingsComponent!!.responsiblePersonText != settings.responsiblePerson)
         modified = modified or (mySettingsComponent!!.inspectorText != settings.inspector)
+        modified = modified or (mySettingsComponent!!.q1Val != settings.q1)
         return modified
     }
 
@@ -49,6 +50,8 @@ class AppSettingsConfigurable : Configurable {
         settings.cookie = mySettingsComponent!!.cookieText
         settings.responsiblePerson = mySettingsComponent!!.responsiblePersonText
         settings.inspector = mySettingsComponent!!.inspectorText
+        settings.q1 = mySettingsComponent!!.q1Val
+        settings.q2 = mySettingsComponent!!.q2Val
     }
 
     override fun reset() {
@@ -61,6 +64,8 @@ class AppSettingsConfigurable : Configurable {
         mySettingsComponent!!.cookieText = settings.cookie
         mySettingsComponent!!.responsiblePersonText = settings.responsiblePerson
         mySettingsComponent!!.inspectorText = settings.inspector
+        mySettingsComponent!!.q1Val = settings.q1
+        mySettingsComponent!!.q2Val = settings.q2
     }
 
     override fun disposeUIResources() {

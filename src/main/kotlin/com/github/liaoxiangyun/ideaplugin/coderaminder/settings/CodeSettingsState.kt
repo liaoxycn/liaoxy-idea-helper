@@ -1,10 +1,12 @@
 package com.github.liaoxiangyun.ideaplugin.coderaminder.settings
 
+import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.XmlSerializerUtil
+import org.gitlab.api.models.GitlabUser
 
 /**
  * Supports storing the application settings in a persistent way.
@@ -17,34 +19,35 @@ class CodeSettingsState : PersistentStateComponent<CodeSettingsState> {
     var userId = "John Q. Public"
     var enableStatus = false
 
-    var origin = "http://gitlab.szewec.com/e.liaoxiangyun"
-    var session = "xxx"
+    var origin = "http://gitlab.szewec.com/"
 
     /**
-     * 间隔天数
+     * token
      */
-    var days = "1"
+    var token = ""
+
+    /**
+     * 公休日历
+     */
+    var calendar = ""
 
     /**
      * 时间
      */
-    var reTimeStr = "17:00-18:30"
+    var reTime = "18:30"
+    var branches = "18:30"
 
     /**
-     * 提醒频率
+     * 每日报告
      */
-    var rateStr = "10"
+    var dailyReport = true
 
-    fun getRate(): Int {
-        try {
-            val valueOf = Integer.valueOf(rateStr)
-            if (valueOf > 0) {
-                return (valueOf * 1000 * 60)
-            }
-        } catch (e: Exception) {
-        }
-        return (1 * 1000 * 60)
-    }
+    /**
+     * 每周报告
+     */
+    var weeklyReport = true
+
+    var gitlabUser: GitlabUser = GitlabUser()
 
 
     override fun getState(): CodeSettingsState {
@@ -53,10 +56,6 @@ class CodeSettingsState : PersistentStateComponent<CodeSettingsState> {
 
     override fun loadState(state: CodeSettingsState) {
         XmlSerializerUtil.copyBean(state, this)
-    }
-
-    override fun toString(): String {
-        return "CodeSettingsState(userId='$userId', enableStatus=$enableStatus, origin='$origin', session='$session', days='$days', reTimeStr='$reTimeStr')"
     }
 
     companion object {

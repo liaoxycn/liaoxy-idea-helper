@@ -34,14 +34,22 @@
                 serviceImplementation="com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsState"/>
         <applicationService
                 serviceImplementation="com.github.liaoxiangyun.ideaplugin.javascript.setting.JsSettingsState"/>
+        <applicationService
+                serviceImplementation="com.github.liaoxiangyun.ideaplugin.java.setting.JavaSettingsState"/>
         <applicationConfigurable parentId=""
                                  instance="com.github.liaoxiangyun.ideaplugin.setting.MainSettingsConfigurable"
                                  id="liaoxy-helper"
-                                 displayName="IDEA助手"/>
+                                 displayName="IDEA助手">
+
+        </applicationConfigurable>
         <applicationConfigurable parentId="liaoxy-helper"
                                  instance="com.github.liaoxiangyun.ideaplugin.javascript.setting.JsSettingsConfigurable"
                                  id="JavaScript"
                                  displayName="JavaScript"/>
+        <applicationConfigurable parentId="liaoxy-helper"
+                                 instance="com.github.liaoxiangyun.ideaplugin.java.setting.JavaSettingConfigurable"
+                                 id="Java"
+                                 displayName="Java"/>
         <applicationConfigurable parentId="liaoxy-helper"
                                  instance="com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsConfigurable"
                                  id="com.github.liaoxiangyun.ideaplugin.commit.settings.AppSettingsConfigurable"
@@ -49,7 +57,7 @@
         <applicationConfigurable parentId="liaoxy-helper"
                                  instance="com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsConfigurable"
                                  id="com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsConfigurable"
-                                 displayName="代码提交提醒"/>
+                                 displayName="代码量统计"/>
 
         <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.common.services.ProjectOpened"/>
         <projectService serviceImplementation="com.github.liaoxiangyun.ideaplugin.javascript.service.JsService"/>
@@ -57,6 +65,11 @@
         <!--实现跳转的lineMarkerProvider-->
         <codeInsight.lineMarkerProvider language="JavaScript"
                                         implementationClass="com.github.liaoxiangyun.ideaplugin.javascript.service.DispatchLineMarkerProvider"/>
+        <!--model图标-->
+        <iconProvider id="baomidou.XmlAndMapperIconProvider"
+                      implementation="com.github.liaoxiangyun.ideaplugin.javascript.provider.ModelIconProvider"/>
+        <completion.contributor id="baomidou.MapperMethodCompletionContributor" language="JAVA"
+                                implementationClass="com.github.liaoxiangyun.ideaplugin.java.contributor.EwParamCompletionContributor"/>
     </extensions>
 
     <applicationListeners>
@@ -68,11 +81,17 @@
     <actions>
         <group id="LoxHelperMenu" text="IDEA助手">
             <add-to-group group-id="MainMenu"/>
+            <separator/>
             <!-- javascript -->
-            <action id="JavascriptModelsMenu" class="com.github.liaoxiangyun.ideaplugin.javascript.action.ModelsAction"
+            <action id="JavascriptModelsMenu" class="com.github.liaoxiangyun.ideaplugin.javascript.action.CodeStatisticsAction"
                     text="扫描 models">
             </action>
+            <separator/>
             <!-- javascript -->
+
+            <action id="CodeStatistics" class="com.github.liaoxiangyun.ideaplugin.javascript.action.CodeStatisticsAction"
+                    text="代码量统计">
+            </action>
             <separator/>
         </group>
 

@@ -142,8 +142,8 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
                 }
             }
             return CommitMessage(
-                selectedChangeType,
-                map
+                    selectedChangeType,
+                    map
             )
         }
 
@@ -231,18 +231,23 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
             run {
                 if (e.stateChange == ItemEvent.SELECTED) {
                     val s = changeScope?.selectedItem as String
-                    val matcher = Pattern.compile("#\\d+(.*?) 需求#(\\d*?)\\s(.*)").matcher(s)
+                    val matcher = Pattern.compile("任务#\\d+(.*?)需求#(\\d*)(.*)").matcher(s)
                     if (matcher.find()) {
-                        val desc = matcher.group(1)
-                        val storyID = matcher.group(2)
-                        val storyTitle = matcher.group(3)
+                        val desc = matcher.group(1)?.trim()
+                        val storyID = matcher.group(2).trim()
+                        val storyTitle = matcher.group(3).trim()
                         textField1?.text = desc
                         comboBox2?.text = storyID
-//                        val taskId = find(s, 1)
-//                        println("选择任务 taskId = $taskId")
-//                        val storyId = HttpHelper().getStoryIdByTaskId(taskId)
-//                        println("找到需求id storyId = $storyId")
-//                        comboBox2?.text = storyId
+                        if (settings.q1) {
+                            val m1 = Pattern.compile("((?:【.*?】)*)(.*)").matcher(desc)
+                            if (m1.find() && m1.groupCount() >= 2) {
+                                val group1 = m1.group(1).trim()
+                                val group2 = m1.group(2).trim()
+//                                textField9?.text = group2
+                                textField7?.text = group2
+                                textField3?.text = group1
+                            }
+                        }
                     }
                 }
             }
@@ -252,10 +257,20 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
             run {
                 if (e.stateChange == ItemEvent.SELECTED) {
                     val s = comboBox1?.selectedItem as String
-                    val matcher = Pattern.compile("#\\d+(.*?)").matcher(s)
+                    val matcher = Pattern.compile("Bug#\\d+(.*)").matcher(s)
                     if (matcher.find()) {
-                        val group = matcher.group(1)
-                        textField6?.text = group
+                        val desc = matcher.group(1)?.trim()
+                        textField6?.text = desc
+                        if (settings.q1) {
+                            val m1 = Pattern.compile("((?:【.*?】)*)(.*)").matcher(desc)
+                            if (m1.find() && m1.groupCount() >= 2) {
+                                val group1 = m1.group(1).trim()
+                                val group2 = m1.group(2).trim()
+                                textField9?.text = group2
+                                textField7?.text = group2
+                                textField3?.text = group1
+                            }
+                        }
                     }
                 }
             }
@@ -279,8 +294,8 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
                 var commitLine = changeType.commitLines()[lines]
                 if (!Util.isEmpty(commitLine.fixedVal)) {
                     Util.setValue(it!!, commitLine.fixedVal!!)
-                } else if (Util.isEmpty(value) && !Util.isEmpty(commitLine.defVal)) {
-                    Util.setValue(it!!, commitLine.defVal!!)
+                } else if (Util.isEmpty(value) && !Util.isEmpty(commitLine.getDefValue())) {
+                    Util.setValue(it!!, commitLine.getDefValue()!!)
                 }
                 lines++
             }
@@ -313,8 +328,7 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
             when (name) {
                 "任务ID" -> {
                     val dataList = HttpHelper().getTaskList()
-//                    var list = dataList.map { tr -> "任务#${tr[0]} ${tr[3]}" }
-                    var list = dataList.map { tr -> "任务#${tr.id} ${tr.name} 需求#${tr.storyID} ${tr.storyTitle}" }
+                    var list = dataList.map { tr -> "任务#${tr.id} ${tr.name} 需求#${tr.storyID ?: ""}" }
                     settings.taskList = list as ArrayList<String>
                     setDefItem(changeScope, list)
                 }
@@ -329,7 +343,7 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
             try {
                 e.printStackTrace()
                 Notify.showErrorNotification(
-                    "获取失败，请检查地址或Cookie" + e.message, project
+                        "获取失败! ,  " + e.message, project
                         ?: null, "${Constant.commitName}："
                 )
             } catch (e: Exception) {
@@ -341,87 +355,87 @@ class CommitPanel constructor(project: Project?, commitMessage: CommitMessage?) 
         when (changeType) {
             ChangeType.TYPE1 -> {
                 return arrayListOf(
-                    label2, textField1,
-                    label3, changeScope, button1,
-                    label4, comboBox2,
-                    label5, textField7,
-                    label6, textField3,
-                    label7, textField4,
-                    label8, textField5,
+                        label2, textField1,
+                        label3, changeScope, button1,
+                        label4, comboBox2,
+                        label5, textField7,
+                        label6, textField3,
+                        label7, textField4,
+                        label8, textField5,
                 )
             }
             ChangeType.TYPE2 -> {
                 return arrayListOf(
-                    label9, textField6,
-                    label10, comboBox1, button2,
-                    label11, textField9,
-                    label5, textField7,
-                    label6, textField3,
-                    label7, textField4,
-                    label8, textField5,
+                        label9, textField6,
+                        label10, comboBox1, button2,
+                        label11, textField9,
+                        label5, textField7,
+                        label6, textField3,
+                        label7, textField4,
+                        label8, textField5,
                 )
             }
             ChangeType.TYPE3 -> {
                 return arrayListOf(
-                    label3, changeScope, button1,
-                    label12, textField10,
-                    label13, textField11,
-                    label14, textField12,
-                    label6, textField3,
-                    label7, textField4,
-                    label8, textField5,
+                        label3, changeScope, button1,
+                        label12, textField10,
+                        label13, textField11,
+                        label14, textField12,
+                        label6, textField3,
+                        label7, textField4,
+                        label8, textField5,
                 )
             }
             ChangeType.TYPE4 -> {
                 return arrayListOf(
-                    label3, changeScope, button1,
-                    label12, textField10,
-                    label13, textField11,
-                    label14, textField12,
-                    label6, textField3,
-                    label7, textField4,
-                    label8, textField5,
+                        label3, changeScope, button1,
+                        label12, textField10,
+                        label13, textField11,
+                        label14, textField12,
+                        label6, textField3,
+                        label7, textField4,
+                        label8, textField5,
                 )
             }
             ChangeType.TYPE5 -> {
                 return arrayListOf(
-                    label3, changeScope, button1,
-                    label15, textField13,
-                    label16, textField14,
-                    label14, textField12,
-                    label6, textField3,
-                    label7, textField4,
-                    label8, textField5,
+                        label3, changeScope, button1,
+                        label15, textField13,
+                        label16, textField14,
+                        label14, textField12,
+                        label6, textField3,
+                        label7, textField4,
+                        label8, textField5,
                 )
             }
             ChangeType.TYPE6 -> {
                 return arrayListOf(
-                    label3, changeScope, button1,
-                    label17, textField15,
+                        label3, changeScope, button1,
+                        label17, textField15,
                 )
             }
             ChangeType.TYPE7 -> {
                 return arrayListOf(
-                    label3, changeScope, button1,
-                    label17, textField15,
+                        label3, changeScope, button1,
+                        label17, textField15,
                 )
             }
             ChangeType.TYPE8 -> {
                 return arrayListOf(
-                    label5, textField7,
-                    label6, textField3,
+                        label5, textField7,
+                        label6, textField3,
                 )
             }
             ChangeType.TYPE9 -> {
                 return arrayListOf(
-                    label3, changeScope, button1,
-                    label17, textField15,
+                        label3, changeScope, button1,
+                        label17, textField15,
                 )
             }
             ChangeType.TYPE10 -> {
                 return arrayListOf(
-                    label3, changeScope, button1,
-                    label17, textField15,
+                        label3, changeScope, button1,
+                        label17, textField15,
                 )
             }
         }

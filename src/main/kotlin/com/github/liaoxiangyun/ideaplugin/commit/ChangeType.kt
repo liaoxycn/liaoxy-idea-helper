@@ -18,8 +18,8 @@ enum class ChangeType(private val title: String, private val description: String
             CommitLine("需求ID", true, null),
             CommitLine("修改描述", true, null),
             CommitLine("影响范围", true, null),
-            CommitLine("责任人", false, null, AppSettingsState.getConfig()?.responsiblePerson),
-            CommitLine("检视人", false, null, AppSettingsState.getConfig()?.inspector))),
+            CommitLine("责任人", false, null, "responsiblePerson"),
+            CommitLine("检视人", false, null, "inspector"))),
 
     /**
      * 修改Bug
@@ -30,8 +30,8 @@ enum class ChangeType(private val title: String, private val description: String
             CommitLine("问题原因", true, null),
             CommitLine("修改描述", true, null),
             CommitLine("影响范围", true, null),
-            CommitLine("责任人", false, null, AppSettingsState.getConfig()?.responsiblePerson),
-            CommitLine("检视人", false, null, AppSettingsState.getConfig()?.inspector))),
+            CommitLine("责任人", false, null, "responsiblePerson"),
+            CommitLine("检视人", false, null, "inspector"))),
 
     /**
      * 代码重构
@@ -42,8 +42,8 @@ enum class ChangeType(private val title: String, private val description: String
             CommitLine("重构原因", true, null),
             CommitLine("优化描述", true, null),
             CommitLine("影响范围", true, null),
-            CommitLine("责任人", false, null, AppSettingsState.getConfig()?.responsiblePerson),
-            CommitLine("检视人", false, null, AppSettingsState.getConfig()?.inspector))),
+            CommitLine("责任人", false, null, "responsiblePerson"),
+            CommitLine("检视人", false, null, "inspector"))),
 
     /**
      * 业务重构
@@ -54,8 +54,8 @@ enum class ChangeType(private val title: String, private val description: String
             CommitLine("重构原因", true, null),
             CommitLine("优化描述", true, null),
             CommitLine("影响范围", true, null),
-            CommitLine("责任人", false, null, AppSettingsState.getConfig()?.responsiblePerson),
-            CommitLine("检视人", false, null, AppSettingsState.getConfig()?.inspector))),
+            CommitLine("责任人", false, null, "responsiblePerson"),
+            CommitLine("检视人", false, null, "inspector"))),
 
     /**
      * 性能优化
@@ -66,8 +66,8 @@ enum class ChangeType(private val title: String, private val description: String
             CommitLine("优化原因", true, null),
             CommitLine("优化描述", true, null),
             CommitLine("影响范围", true, null),
-            CommitLine("责任人", false, null, AppSettingsState.getConfig()?.responsiblePerson),
-            CommitLine("检视人", false, null, AppSettingsState.getConfig()?.inspector))),
+            CommitLine("责任人", false, null, "responsiblePerson"),
+            CommitLine("检视人", false, null, "inspector"))),
 
     /**
      * 代码格式化
