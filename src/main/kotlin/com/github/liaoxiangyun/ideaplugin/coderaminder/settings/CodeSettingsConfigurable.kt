@@ -1,6 +1,7 @@
 package com.github.liaoxiangyun.ideaplugin.coderaminder.settings
 
 import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant
+import com.github.liaoxiangyun.ideaplugin.common.services.MyApplicationService
 import com.intellij.openapi.options.Configurable
 import org.gitlab.api.GitlabAPI
 import org.jetbrains.annotations.Nls
@@ -55,15 +56,15 @@ class CodeSettingsConfigurable : Configurable {
         settings.weeklyReport = mySettingsComponent!!.weeklyReportStatus
 
         println("apply token")
-        httpGet(mySettingsComponent!!.originText, mySettingsComponent!!.tokenText)
+        handler(settings)
     }
 
-    private fun httpGet(origin: String, token: String) {
+    private fun handler(state: CodeSettingsState) {
         val settings = CodeSettingsState.instance
         try {
-            val gitlabAPI = GitlabAPI.connect(origin, token)
+            val gitlabAPI = GitlabAPI.connect(state.origin, state.token)
             settings.gitlabUser = gitlabAPI.user
-            println(settings.gitlabUser)
+            MyApplicationService.instance.codeStatisticsTask()
         } catch (e: Exception) {
         }
     }

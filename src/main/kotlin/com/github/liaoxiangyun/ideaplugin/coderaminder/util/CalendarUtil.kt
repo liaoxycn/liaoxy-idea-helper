@@ -7,6 +7,7 @@ import java.io.InputStreamReader
 import java.text.ParseException
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 
@@ -15,8 +16,8 @@ object CalendarUtil {
     @JvmStatic
     fun main(args: Array<String>) {
 
-        val weekDays = getWeekDays(1)
-        println("weekDays = ${weekDays}")
+
+        println("s = ${parseTime("18:30")}")
 
     }
 
@@ -24,8 +25,16 @@ object CalendarUtil {
 
 
     private val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
-    open fun format(date: LocalDate): String {
+    private val timeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+    open fun dateStr(date: LocalDate): String {
         return date.format(dateFormat)
+    }
+
+    open fun parseTime(str: String): LocalTime {
+        if (str.length == 5) {
+            return LocalTime.parse("$str:00", timeFormat)
+        }
+        return LocalTime.parse(str, timeFormat)
     }
 
     open fun isOffDay(localDate: LocalDate): Boolean {
@@ -108,6 +117,10 @@ object CalendarUtil {
     }
 
 
+    open fun getDefaultContent(): String {
+        return getContent("/json/2022.json")
+    }
+
     private fun getContent(path: String): String {
         val stream = CalendarUtil.javaClass.getResourceAsStream(path)
 
@@ -130,7 +143,7 @@ object CalendarUtil {
         return JSONUtil.toBean(json, clazz)
     }
 
-    private fun setMapByJson(str: String): MutableMap<String, Int> {
+    private fun setMapByJson(str: String) {
         try {
             if (str.isNotBlank()) {
                 val toObj = getObj(str, Map::class.java)
@@ -141,20 +154,16 @@ object CalendarUtil {
                 }
             }
         } catch (e: Exception) {
+            e.printStackTrace()
         }
-        return calendarMap
     }
 
     private fun loadData() {
         val settingsState = CodeSettingsState.instance
         if (settingsState.calendar.isBlank()) {
-            settingsState.calendar = getContent("/json/2022.json")
+            settingsState.calendar = getDefaultContent()
         }
         setMapByJson(settingsState.calendar)
-    }
-
-    init {
-        loadData()
     }
 
 }
