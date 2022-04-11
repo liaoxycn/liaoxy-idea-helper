@@ -1,4 +1,4 @@
-package com.github.liaoxiangyun.ideaplugin.javascript.action
+package com.github.liaoxiangyun.ideaplugin.coderaminder.action
 
 import com.github.liaoxiangyun.ideaplugin.coderaminder.util.HttpHelper
 import com.intellij.openapi.actionSystem.AnAction

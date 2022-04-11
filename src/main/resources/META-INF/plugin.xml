@@ -83,13 +83,14 @@
             <add-to-group group-id="MainMenu"/>
             <separator/>
             <!-- javascript -->
-            <action id="JavascriptModelsMenu" class="com.github.liaoxiangyun.ideaplugin.javascript.action.CodeStatisticsAction"
+            <action id="JavascriptModelsMenu" class="com.github.liaoxiangyun.ideaplugin.javascript.action.ModelsAction"
                     text="扫描 models">
             </action>
             <separator/>
             <!-- javascript -->
 
-            <action id="CodeStatistics" class="com.github.liaoxiangyun.ideaplugin.javascript.action.CodeStatisticsAction"
+            <action id="CodeStatistics"
+                    class="com.github.liaoxiangyun.ideaplugin.coderaminder.action.CodeStatisticsAction"
                     text="代码量统计">
             </action>
             <separator/>
