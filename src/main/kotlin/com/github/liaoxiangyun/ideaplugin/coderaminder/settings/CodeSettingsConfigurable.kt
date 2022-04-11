@@ -55,18 +55,15 @@ class CodeSettingsConfigurable : Configurable {
         settings.dailyReport = mySettingsComponent!!.dailyReportStatus
         settings.weeklyReport = mySettingsComponent!!.weeklyReportStatus
 
-        println("apply token")
+
         handler(settings)
     }
 
     private fun handler(state: CodeSettingsState) {
         val settings = CodeSettingsState.instance
-        try {
-            val gitlabAPI = GitlabAPI.connect(state.origin, state.token)
-            settings.gitlabUser = gitlabAPI.user
-            MyApplicationService.instance.codeStatisticsTask()
-        } catch (e: Exception) {
-        }
+        val gitlabAPI = GitlabAPI.connect(state.origin, state.token)
+        settings.gitlabUser = gitlabAPI.user
+        MyApplicationService.instance.codeStatisticsTask()
     }
 
     override fun reset() {

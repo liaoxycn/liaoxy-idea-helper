@@ -9,18 +9,11 @@
 - [ ] Git commit template （Git 提交模板）
 - [ ] Code statistics （代码统计）
 - [ ] React umi dispatch navigation （umi dispatch 跳转）
-- [ ] Code Template （代码模版）
 
 <!-- Plugin description -->
-liaoxy helper<br>
-This plug-in integrates various customized functions<br>
-At present, it has achieved the following goals:<br>
-【Git commit template】<br>
-This plugin allows to create a commit message with the following template:<br>
-【label1】: describe<br>
-【label2】: describe<br>
-...<br>
-Various functions will be updated later ...  <br>
+代码统计<br>
+umi dispatch 跳转<br>
+Git 提交模板<br>
 <!-- Plugin description end -->
 
 ## Installation
