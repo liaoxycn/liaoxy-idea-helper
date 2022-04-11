@@ -97,7 +97,7 @@ class HttpHelper {
         val now = LocalDateTime.now()
         val toDayEpochDay = now.toLocalDate().toEpochDay()
         val sinceDateTime = now.plusDays(-14)
-        println("两周前是 ${CalendarUtil.format(sinceDateTime.toLocalDate())}")
+        println("两周前是 ${CalendarUtil.dateStr(sinceDateTime.toLocalDate())}")
 
         var commitMap = mutableMapOf<String, Event.Data.Commit>()
 
@@ -108,7 +108,7 @@ class HttpHelper {
             ++page
             list = getList(replace.replace("{page}", page.toString()), Event::class.java)
             val createdAt = parseTime(list.last().created_at)
-            println("#遍历用户事件 page=$page 本页最早时间=${CalendarUtil.format(createdAt.toLocalDate())}")
+            println("#遍历用户事件 page=$page 本页最早时间=${CalendarUtil.dateStr(createdAt.toLocalDate())}")
             //过滤 actionName=pushed to
             for (e in list.filter { it.action_name == "pushed to" && it.data?.ref?.endsWith(branch) == true }) {
                 val projectId = e.project_id

@@ -1,6 +1,5 @@
 package com.github.liaoxiangyun.ideaplugin.coderaminder.model
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.liaoxiangyun.ideaplugin.coderaminder.util.CalendarUtil
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -30,7 +29,7 @@ class GitSummary {
 
         constructor(date: LocalDate, epochDay: Long, total: Int) {
             this.date = date
-            this.dateStr = CalendarUtil.format(date)
+            this.dateStr = CalendarUtil.dateStr(date)
             this.epochDay = epochDay
             this.total = total
         }
@@ -58,7 +57,7 @@ class GitSummary {
             this.total = total
             val localDate = createAt.toLocalDate()
             this.date = localDate
-            this.dateStr = CalendarUtil.format(localDate)
+            this.dateStr = CalendarUtil.dateStr(localDate)
             epochDay = localDate.toEpochDay()
         }
     }

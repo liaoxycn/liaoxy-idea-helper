@@ -1,6 +1,6 @@
 package com.github.liaoxiangyun.ideaplugin.coderaminder.settings
 
-import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant
+import com.github.liaoxiangyun.ideaplugin.coderaminder.util.CalendarUtil
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.State
@@ -35,7 +35,7 @@ class CodeSettingsState : PersistentStateComponent<CodeSettingsState> {
      * 时间
      */
     var reTime = "18:30"
-    var branches = "18:30"
+    var branches = "develop"
 
     /**
      * 每日报告
@@ -55,6 +55,9 @@ class CodeSettingsState : PersistentStateComponent<CodeSettingsState> {
     }
 
     override fun loadState(state: CodeSettingsState) {
+        if (state.calendar.isBlank()) {
+            state.calendar = CalendarUtil.getDefaultContent();
+        }
         XmlSerializerUtil.copyBean(state, this)
     }
 
