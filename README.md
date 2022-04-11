@@ -39,6 +39,6 @@ Plugin based on the [IntelliJ Platform Plugin Template][template].
 
 [git-commit-template](help/git-commit-template/help.md)
 
-[code-submission-reminder](help/code-submission-reminder/help.md)
+[Code statistics](help/code-statistics/help.md)
 
 [umi-dispatch-navigation](help/umi-dispatch-navigation/help.md)
