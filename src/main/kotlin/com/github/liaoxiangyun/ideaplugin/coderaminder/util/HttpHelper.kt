@@ -4,6 +4,7 @@ import cn.hutool.json.JSONUtil
 import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant
 import com.github.liaoxiangyun.ideaplugin.coderaminder.model.GitSummary
 import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.CommitDetail
+import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.CommitRecord
 import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.Event
 import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.Project
 import com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsState
@@ -12,6 +13,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.gitlab.api.GitlabAPI
+import org.gitlab.api.models.GitlabUser
 import java.io.IOException
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -31,7 +33,7 @@ class HttpHelper {
 
     //第二步，获取当前用户可见的所有项目（即使用户不是成员）
     //接口地址：gitlab的地址/api/v4/projects/?private_token=xxx
-    private var url_projects = "/api/v4/projects?pagination=keyset&per_page=2&order_by=created_at&sort=desc"
+    private var url_projects = "/api/v4/projects?pagination=keyset&per_page=100&order_by=created_at&sort=desc"
 
     //    第三步，遍历项目，根据项目id获取分支列表
 //    接口地址：http://gitlab地址/api/v4/projects/项目id/repository/branches?private_token=xxx
@@ -41,12 +43,12 @@ class HttpHelper {
 //    注意，当title或message首单词为Merge，表示合并操作，剔除此代码量
 //    接口地址：
 //    http://gitlab地址/api/v4/projects/项目id/repository/commits?ref_name=master&private_token=xxx
-    private var url_commits = "/api/v4/projects/{项目id}/repository/commits?ref_name={master}&since={since}"
+    private var url_commits = "/api/v4/projects/%s/repository/commits?ref_name=%s&since=%s&per_page=100&page=%s"
 
     //    第五步，根据commits的id获取代码量
 //    接口地址:
 //    http://gitlab地址/api/v4/projects/项目id/repository/commits/commits的id?private_token=xxx
-    private val url_commits_detail = "/api/v4/projects/{项目id}/repository/commits/{commitsId}"
+    private val url_commits_detail = "/api/v4/projects/%s/repository/commits/%s"
 
     private var url_events = "/api/v4/users/{用户id}/events?per_page=100&page={page}"
 
@@ -84,11 +86,11 @@ class HttpHelper {
     }
 
 
-    private fun getUserId(): Int {
+    private fun getUser(): GitlabUser {
         if (settings.gitlabUser == null) {
             settings.gitlabUser = GitlabAPI.connect(settings.origin, settings.token).user
         }
-        return settings.gitlabUser.id
+        return settings.gitlabUser!!
     }
 
     fun getSummary2(): GitSummary {
@@ -99,44 +101,45 @@ class HttpHelper {
         val sinceDateTime = now.plusDays(-14)
         println("两周前是 ${CalendarUtil.dateStr(sinceDateTime.toLocalDate())}")
 
-        var commitMap = mutableMapOf<String, Event.Data.Commit>()
+        val connect = GitlabAPI.connect(settings.origin, settings.token)
 
         var list: List<Event>?
+        var projectIds: ArrayList<String> = arrayListOf()
         var page = 0
-        val replace = url_events.replace("{用户id}", "${getUserId()}")
+        val replace = url_events.replace("{用户id}", "${getUser().id}")
         do {
             ++page
             list = getList(replace.replace("{page}", page.toString()), Event::class.java)
             val createdAt = parseTime(list.last().created_at)
             println("#遍历用户事件 page=$page 本页最早时间=${CalendarUtil.dateStr(createdAt.toLocalDate())}")
             //过滤 actionName=pushed to
-            for (e in list.filter { it.action_name == "pushed to" && it.data?.ref?.endsWith(branch) == true }) {
-                val projectId = e.project_id
-                e.data.let { d ->
-                    val path_with_namespace = d?.project?.path_with_namespace ?: ""
-                    d?.commits?.forEach {
-                        if (((it.author.email == d.user_email) && !it.message.startsWith("Merge branch"))) {
-                            it.project_id = projectId
-                            it.path_with_namespace = path_with_namespace
-                            commitMap[it.id] = it
-                        }
-                    }
-                }
+            for (e in list) {
+                projectIds.add(e.project_id)
             }
         } while (createdAt > sinceDateTime)
-        println("commitMap.size = ${commitMap.size}")
+        projectIds = projectIds.distinct() as ArrayList<String>
+        println("最近2周修改的项目有${projectIds}")
 
-        val values = commitMap.values
-        val commits = values.parallelStream().map {
-            val url = url_commits_detail.replace("{项目id}", it.project_id)
-                    .replace("{commitsId}", it.id)
-            val detail = getObj(url, CommitDetail::class.java)
-            val stats = detail.stats
-            val commit = GitSummary.Commit(detail.id, it.project_id, it.path_with_namespace,
-                    detail.getTime(),
-                    stats.additions, stats.deletions, stats.total)
-            commit
-        }.collect(Collectors.toList())
+        val commits = projectIds.parallelStream().map { projectId ->
+            val ll = arrayListOf<GitSummary.Commit>()
+            var page = 0
+            do {
+                val url = url_commits.format(projectId, branch, sinceDateTime.format(Constant.FORMATTER), ++page)
+                val list = getList(url, CommitRecord::class.java)
+                val cs = list.filter { !it.message.startsWith("Merge branch") && it.committer_email == getUser().email }.parallelStream().map { commit ->
+                    val detail = getObj(url_commits_detail.format(projectId, commit.id), CommitDetail::class.java)
+                    val stats = detail.stats
+                    val commit = GitSummary.Commit(detail.id, projectId, "",
+                            detail.getTime(),
+                            stats.additions, stats.deletions, stats.total)
+                    commit
+                }.collect(Collectors.toList())
+                ll.addAll(cs)
+            } while (list.isNotEmpty() && parseTime(list.last().created_at) > sinceDateTime)
+            println("projectId=$projectId branch=$branch 最近两周共${ll.size}条提交记录")
+            ll.stream()
+        }.flatMap { it }.collect(Collectors.toList())
+
         var days = arrayListOf<GitSummary.Day>()
 
         println("commits =============================\n${JSONUtil.toJsonStr(commits)}\n")
