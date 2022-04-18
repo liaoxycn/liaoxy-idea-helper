@@ -1,6 +1,7 @@
 package com.github.liaoxiangyun.ideaplugin.coderaminder.settings
 
 import com.github.liaoxiangyun.ideaplugin.coderaminder.common.Constant
+import com.github.liaoxiangyun.ideaplugin.coderaminder.util.CalendarUtil
 import com.github.liaoxiangyun.ideaplugin.common.services.MyApplicationService
 import com.intellij.openapi.options.Configurable
 import org.gitlab.api.GitlabAPI
@@ -71,7 +72,7 @@ class CodeSettingsConfigurable : Configurable {
         mySettingsComponent!!.userNameText = settings.userId
         mySettingsComponent!!.originText = settings.origin
         mySettingsComponent!!.tokenText = settings.token
-        mySettingsComponent!!.calendarText = settings.calendar
+        mySettingsComponent!!.calendarText = if(settings.calendar.isBlank()) settings.calendar else CalendarUtil.getDefaultContent();
         mySettingsComponent!!.reTimeText = settings.reTime
         mySettingsComponent!!.branchesText = settings.branches
         mySettingsComponent!!.enableStatus = settings.enableStatus

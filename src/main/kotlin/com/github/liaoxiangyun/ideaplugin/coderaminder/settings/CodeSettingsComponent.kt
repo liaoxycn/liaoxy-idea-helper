@@ -77,6 +77,8 @@ class CodeSettingsComponent {
         }
 
     init {
+        enableCheck.isVisible = false
+        weeklyReport.isVisible = false
         calendar.wrapStyleWord = true
         val scrollPane = JScrollPane(calendar);
         scrollPane.verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED

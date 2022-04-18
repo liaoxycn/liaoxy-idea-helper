@@ -17,6 +17,7 @@ import org.gitlab.api.models.GitlabUser
 import java.io.IOException
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.util.stream.Collectors
 
 
@@ -94,11 +95,12 @@ class HttpHelper {
     }
 
     fun getSummary2(): GitSummary {
+        val start = System.currentTimeMillis();
 
         val gitSummary = GitSummary()
         val now = LocalDateTime.now()
         val toDayEpochDay = now.toLocalDate().toEpochDay()
-        val sinceDateTime = now.plusDays(-14)
+        val sinceDateTime = LocalDateTime.of(CalendarUtil.getWeekDays(-1)[0], LocalTime.MIN)
         println("两周前是 ${CalendarUtil.dateStr(sinceDateTime.toLocalDate())}")
 
         val connect = GitlabAPI.connect(settings.origin, settings.token)
@@ -126,7 +128,7 @@ class HttpHelper {
             do {
                 val url = url_commits.format(projectId, branch, sinceDateTime.format(Constant.FORMATTER), ++page)
                 val list = getList(url, CommitRecord::class.java)
-                val cs = list.filter { !it.message.startsWith("Merge branch") && it.committer_email == getUser().email }.parallelStream().map { commit ->
+                val cs = list.filter { !it.message.startsWith("Merge") && it.committer_email == getUser().email }.parallelStream().map { commit ->
                     val detail = getObj(url_commits_detail.format(projectId, commit.id), CommitDetail::class.java)
                     val stats = detail.stats
                     val commit = GitSummary.Commit(detail.id, projectId, "",
@@ -192,14 +194,14 @@ class HttpHelper {
                 "-本周：${avg1}=${gitSummary.week}/${weeks1.size} 行\n  ${weekMsg1}\n" +
                 "\n" +
                 "最低代码量标准：java>60${if (avg1 >= 60) "(√)" else "(×)"} 前端>70${if (avg1 >= 70) "(√)" else "(×)"}\n" +
-                "法定休息日不统计\n"
+                "本次耗时${System.currentTimeMillis() - start}ms\n"
         gitSummary.messages = messages
+
 
         return gitSummary
     }
 
     private fun day2zh(date: LocalDate): String {
-        val now = LocalDate.now()
         //计算相差日，转成 昨天、今天、明天、xx号
         return "${date.dayOfMonth}"
     }
