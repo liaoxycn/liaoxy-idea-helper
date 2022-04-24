@@ -30,7 +30,7 @@ open class CommitRecord {
      * 合并的代码不统计
      */
     open fun isMerge(): Boolean {
-        if (parent_ids.size > 0 || message.startsWith("Merge")) {
+        if (parent_ids.size >= 2 || message.startsWith("Merge")) {
             return true
         }
         return false
@@ -40,10 +40,10 @@ open class CommitRecord {
         var str = ""
         if (this.created_at?.length > 19) {
             str = this.created_at.replace("T", " ").substring(0, 19)
-        } else if (this.committer_date?.length > 19) {
-            str = this.committer_date.replace("T", " ").substring(0, 19)
         } else if (this.authored_date?.length > 19) {
             str = this.authored_date.replace("T", " ").substring(0, 19)
+        } else if (this.committer_date?.length > 19) {
+            str = this.committer_date.replace("T", " ").substring(0, 19)
         } else {
             println(JSONUtil.toJsonStr(this))
         }
