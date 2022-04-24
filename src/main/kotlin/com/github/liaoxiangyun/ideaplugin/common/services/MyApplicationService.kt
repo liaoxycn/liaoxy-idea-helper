@@ -51,7 +51,7 @@ class MyApplicationService : Closeable {
                 time
             }
             Notify.showWarnNotification("将在 ${dateTime.format(Constant.FORMATTER)} 运行统计任务",
-                    ProjectUtils.currProject, Constant.setttingName, 2)
+                    ProjectUtils.currProject, Constant.setttingName, 1)
 
             /**
              * 所有schedule方法都接受相对延迟和周期作为参数，而不是绝对时间或日期。
@@ -84,9 +84,9 @@ class MyApplicationService : Closeable {
                 "IDEA助手",
                 "${title}：", "${content}"
         )
-        Notify.showErrorNotification(
+        Notify.showSuccessNotification(
                 content,
-                ProjectUtils.currProject, "${title}：", 3
+                ProjectUtils.currProject, "${title}：", 2
         )
     }
 
@@ -96,7 +96,7 @@ class MyApplicationService : Closeable {
         println("【MyApplicationService,,】 init")
         executorService.schedule({
             execTask()
-        }, 1, TimeUnit.MINUTES)
+        }, 3, TimeUnit.MINUTES)
     }
 
     override fun close() {

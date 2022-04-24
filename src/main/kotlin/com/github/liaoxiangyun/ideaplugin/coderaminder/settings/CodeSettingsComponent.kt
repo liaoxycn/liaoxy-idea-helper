@@ -77,6 +77,7 @@ class CodeSettingsComponent {
         branches.toolTipText = "多分支用英文符号'|'分隔，如 develop|master"
         enableCheck.isVisible = false
         calendar.wrapStyleWord = true
+        calendar.toolTipText = "0节日，1工作日，2周末"
         val scrollPane = JScrollPane(calendar);
         scrollPane.verticalScrollBarPolicy = JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
 
@@ -84,7 +85,7 @@ class CodeSettingsComponent {
         val jbLabel = JBLabel("")
         val jButton2 = JButton("两周内修改分支")
         jButton2.addActionListener {
-            var strs = HttpHelper().getStrs("branch", null);
+            var strs = HttpHelper().getField("branch", null);
             println("strs=$strs")
             strs.add("develop")
             val branchNames = strs.stream().filter { it.isNotBlank() }.distinct().collect(Collectors.joining("|"))
@@ -92,7 +93,7 @@ class CodeSettingsComponent {
         }
         val jButton3 = JButton("默认分支")
         jButton3.addActionListener {
-            branches.text = "develop|release|preprod|master"
+            branches.text = "develop | release | preprod | master"
         }
         val jPanel = JPanel()
         jPanel.add(jButton2)
@@ -107,7 +108,7 @@ class CodeSettingsComponent {
             Messages.showMessageDialog(ProjectUtils.currProject, summary.messages, title, Messages.getInformationIcon())
         }
         val jbLabel1 = JBLabel(" TOKEN")
-        jbLabel1.toolTipText = "Gitlab个人头像>Setting>Access Tokens"
+        token.toolTipText = "Gitlab个人头像>Setting>Access Tokens"
         panel = FormBuilder.createFormBuilder()
                 .addLabeledComponent(
                         JBLabel("当前项目："),

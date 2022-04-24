@@ -7,12 +7,9 @@ import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.CommitDetail
 import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.CommitRecord
 import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.Event
 import com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsState
-import com.google.gson.Gson
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.gitlab.api.GitlabAPI
-import org.gitlab.api.models.GitlabUser
 import java.io.IOException
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -23,13 +20,10 @@ import java.util.stream.Collectors
 class HttpHelper {
 
     private var settings: CodeSettingsState = CodeSettingsState.instance
-    private val gson: Gson = Gson()
-    private var origin = "http://gitlab.szewec.com/"
     private var branches = arrayListOf<String>()
     private var branch = ""
 
     //第一步，生成私钥
-    private var token = ""
 
     //第二步，获取当前用户可见的所有项目（即使用户不是成员）
     //接口地址：gitlab的地址/api/v4/projects/?private_token=xxx
@@ -58,8 +52,6 @@ class HttpHelper {
     }
 
     init {
-        origin = settings.origin
-        token = settings.token
         branches = settings.branches.split("|").map { it.trim() }.filter { it.isNotBlank() } as ArrayList<String>
         println("branches=$branches")
         branch = if (branches.isNotEmpty()) {
@@ -73,7 +65,7 @@ class HttpHelper {
         val httpUrl = url.toHttpUrl()
         println(httpUrl)
         val get: Request.Builder = Request.Builder().url(httpUrl)
-                .addHeader("PRIVATE-TOKEN", token)
+                .addHeader("PRIVATE-TOKEN", settings.token)
                 .get()
         val request: Request = get.build()
         httpClient.newCall(request).execute().use { response ->
@@ -87,20 +79,13 @@ class HttpHelper {
     }
 
 
-    private fun getUser(): GitlabUser {
-        if (settings.gitlabUser == null) {
-            settings.gitlabUser = GitlabAPI.connect(settings.origin, settings.token).user
-        }
-        return settings.gitlabUser!!
-    }
-
-    fun getStrs(filed: String, since: LocalDateTime?): ArrayList<String> {
+    fun getField(filed: String, since: LocalDateTime?): ArrayList<String> {
         var sinceDateTime = if (since !== null) since else LocalDateTime.of(CalendarUtil.getWeekDays(-1)[0], LocalTime.MIN)
 
         var list: List<Event>?
         var strs: ArrayList<String> = arrayListOf()
         var page = 0
-        val replace = url_events.replace("{用户id}", "${getUser().id}")
+        val replace = url_events.replace("{用户id}", "${settings.getUser().id}")
         do {
             ++page
             list = getList(replace.replace("{page}", page.toString()), Event::class.java)
@@ -123,6 +108,24 @@ class HttpHelper {
         return strs
     }
 
+    private fun getCommitIds(projectId: String, branch: String, sinceDateTime: LocalDateTime): ArrayList<String> {
+        val ll = arrayListOf<String>()
+        var page = 0
+        do {
+            val url = url_commits.format(projectId, branch, sinceDateTime.format(Constant.FORMATTER), ++page)
+            val list = getList(url, CommitRecord::class.java)
+            val cs = list.filter {
+                !it.isMerge() && !it.message.startsWith("Revert")
+                        && it.committer_email == settings.getUser().email
+            }.parallelStream().map { commit ->
+                commit.id
+            }.collect(Collectors.toList())
+            ll.addAll(cs)
+        } while (list.isNotEmpty())
+        println("projectId=$projectId branch=$branch 最近两周共${ll.size}条提交记录")
+        return ll
+    }
+
     fun getSummary2(): GitSummary {
         val start = System.currentTimeMillis();
 
@@ -132,36 +135,24 @@ class HttpHelper {
         val sinceDateTime = LocalDateTime.of(CalendarUtil.getWeekDays(-1)[0], LocalTime.MIN)
         println("两周前是 ${CalendarUtil.dateStr(sinceDateTime.toLocalDate())}")
 
-        val projectIds = getStrs("projectId", sinceDateTime)
+        val projectIds = getField("projectId", sinceDateTime)
 
         val commits = projectIds.parallelStream().map { projectId ->
-            val ll = arrayListOf<GitSummary.Commit>()
-            var page = 0
-            do {
-                val list = branches.parallelStream().flatMap { branch ->
-                    val url = url_commits.format(projectId, branch, sinceDateTime.format(Constant.FORMATTER), ++page)
-                    getList(url, CommitRecord::class.java).stream()
-                }.collect(Collectors.toList())
-                val cs = list.filter {
-                    !it.message.startsWith("Merge") && !it.message.startsWith("Revert")
-                            && it.committer_email == getUser().email
-                }.parallelStream().map { commit ->
-                    val detail = getObj(url_commits_detail.format(projectId, commit.id), CommitDetail::class.java)
-                    val stats = detail.stats
-                    val commit = GitSummary.Commit(detail.id, projectId, "",
-                            detail.getTime(),
-                            stats.additions, stats.deletions, stats.total)
-                    commit
-                }.collect(Collectors.toList())
-                ll.addAll(cs)
-            } while (list.isNotEmpty())
-            println("projectId=$projectId branch=$branch 最近两周共${ll.size}条提交记录")
-            ll.stream()
+            val commitIds = branches.parallelStream().flatMap { branch ->
+                getCommitIds(projectId, branch, sinceDateTime).stream()
+            }.distinct().collect(Collectors.toList())
+            val cs = commitIds.parallelStream().map { commitId ->
+                val detail = getObj(url_commits_detail.format(projectId, commitId), CommitDetail::class.java)
+                val stats = detail.stats
+                val commit = GitSummary.Commit(detail.id, projectId, "",
+                        detail.getTime(),
+                        stats.additions, stats.deletions, stats.total)
+                commit
+            }.collect(Collectors.toList())
+            cs.stream()
         }.flatMap { it }.collect(Collectors.toList())
 
         var days = arrayListOf<GitSummary.Day>()
-
-        println("commits =============================\n${JSONUtil.toJsonStr(commits)}\n")
 
         //以每天分组
         val epochDayMap = commits.stream().collect(Collectors.groupingBy(GitSummary.Commit::epochDay))
@@ -229,7 +220,7 @@ class HttpHelper {
     }
 
     private fun <T> getObj(url: String, clazz: Class<T>): T {
-        val html = getHtml(origin + url)
+        val html = getHtml(settings.origin + url)
         if (html.startsWith("{\n    \"message")) {
             RuntimeException(html)
         }
@@ -237,7 +228,7 @@ class HttpHelper {
     }
 
     private fun <T> getList(url: String, clazz: Class<T>): List<T> {
-        val html = getHtml(origin + url)
+        val html = getHtml(settings.origin + url)
         if (html.startsWith("{\n    \"message")) {
             RuntimeException(html)
         }

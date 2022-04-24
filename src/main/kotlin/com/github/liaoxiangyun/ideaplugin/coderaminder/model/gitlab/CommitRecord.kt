@@ -30,7 +30,7 @@ open class CommitRecord {
      * 合并的代码不统计
      */
     open fun isMerge(): Boolean {
-        if (parent_ids.size > 0) {
+        if (parent_ids.size > 0 || message.startsWith("Merge")) {
             return true
         }
         return false

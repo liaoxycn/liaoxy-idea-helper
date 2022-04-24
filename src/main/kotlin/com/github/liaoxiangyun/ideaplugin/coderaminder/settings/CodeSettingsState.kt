@@ -6,6 +6,7 @@ import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.XmlSerializerUtil
+import org.gitlab.api.GitlabAPI
 import org.gitlab.api.models.GitlabUser
 
 /**
@@ -45,6 +46,12 @@ class CodeSettingsState : PersistentStateComponent<CodeSettingsState> {
 
     var gitlabUser: GitlabUser = GitlabUser()
 
+    open fun getUser(): GitlabUser {
+        if (gitlabUser == null) {
+            gitlabUser = GitlabAPI.connect(origin, token).user
+        }
+        return gitlabUser!!
+    }
 
     override fun getState(): CodeSettingsState {
         return this

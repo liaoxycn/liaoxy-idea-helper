@@ -54,8 +54,8 @@ object CalendarUtil {
     }
 
     open fun getWeekDays(week: Int): ArrayList<LocalDate> {
-        loadData()
         val now = LocalDate.now()
+        loadData(now)
         var weekDays = getWeekDays2(now)
         if (week == 0) {
             return weekDays
@@ -148,8 +148,12 @@ object CalendarUtil {
             if (str.isNotBlank()) {
                 val toObj = getObj(str, Map::class.java)
                 for (entry in toObj) {
-                    for (e in (entry.value as Map<Any, Any>)) {
-                        calendarMap[e.key as String] = e.value.toString().toInt()
+                    if (entry.value is Int) {
+                        calendarMap[entry.key as String] = entry.value as Int
+                    } else if (entry.value is Map<*, *>) {
+                        for (e in (entry.value as Map<Any, Any>)) {
+                            calendarMap[e.key as String] = e.value.toString().toInt()
+                        }
                     }
                 }
             }
@@ -158,10 +162,10 @@ object CalendarUtil {
         }
     }
 
-    private fun loadData() {
+    private fun loadData(now: LocalDate) {
         val settingsState = CodeSettingsState.instance
-        if (settingsState.calendar.isBlank()) {
-            settingsState.calendar = getDefaultContent()
+        if (now.year == 2022) {
+            setMapByJson(getContent("/json/2022.json"))
         }
         setMapByJson(settingsState.calendar)
     }
