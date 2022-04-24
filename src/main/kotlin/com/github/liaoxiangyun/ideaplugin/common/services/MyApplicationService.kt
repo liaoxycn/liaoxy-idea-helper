@@ -39,11 +39,14 @@ class MyApplicationService : Closeable {
             //新建任务
             //确定时间
             val reTime = CodeSettingsState.instance.reTime.trim()
-            val date = LocalDate.now()
+            val list = CalendarUtil.getWeekDays(0).filter { !CalendarUtil.isOffDay(it) }
+            val date: LocalDate = list[list.size - 1]
             val now = LocalDateTime.now()
             val time = LocalDateTime.of(date, CalendarUtil.parseTime(reTime))
-            var dateTime: LocalDateTime = if (now >= time) {//时间已过，算下一天
-                time.plusDays(1)
+            var dateTime: LocalDateTime = if (now >= time) {//时间已过，算下一周
+                val list2 = CalendarUtil.getWeekDays(1).filter { !CalendarUtil.isOffDay(it) }
+                val date2: LocalDate = list2[list.size - 1]
+                LocalDateTime.of(date2, CalendarUtil.parseTime(reTime))
             } else {
                 time
             }

@@ -40,7 +40,6 @@ class CodeSettingsConfigurable : Configurable {
         modified = modified or (mySettingsComponent!!.branchesText != settings.branches)
         modified = modified or (mySettingsComponent!!.enableStatus != settings.enableStatus)
         modified = modified or (mySettingsComponent!!.dailyReportStatus != settings.dailyReport)
-        modified = modified or (mySettingsComponent!!.weeklyReportStatus != settings.weeklyReport)
         return modified
     }
 
@@ -54,7 +53,6 @@ class CodeSettingsConfigurable : Configurable {
         settings.branches = mySettingsComponent!!.branchesText
         settings.enableStatus = mySettingsComponent!!.enableStatus
         settings.dailyReport = mySettingsComponent!!.dailyReportStatus
-        settings.weeklyReport = mySettingsComponent!!.weeklyReportStatus
 
 
         handler(settings)
@@ -72,12 +70,11 @@ class CodeSettingsConfigurable : Configurable {
         mySettingsComponent!!.userNameText = settings.userId
         mySettingsComponent!!.originText = settings.origin
         mySettingsComponent!!.tokenText = settings.token
-        mySettingsComponent!!.calendarText = if(settings.calendar.isBlank()) settings.calendar else CalendarUtil.getDefaultContent();
+        mySettingsComponent!!.calendarText = settings.calendar.ifBlank { CalendarUtil.getDefaultContent() };
         mySettingsComponent!!.reTimeText = settings.reTime
         mySettingsComponent!!.branchesText = settings.branches
         mySettingsComponent!!.enableStatus = settings.enableStatus
         mySettingsComponent!!.dailyReportStatus = settings.dailyReport
-        mySettingsComponent!!.weeklyReportStatus = settings.weeklyReport
     }
 
     override fun disposeUIResources() {

@@ -6,7 +6,6 @@ import com.github.liaoxiangyun.ideaplugin.coderaminder.model.GitSummary
 import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.CommitDetail
 import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.CommitRecord
 import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.Event
-import com.github.liaoxiangyun.ideaplugin.coderaminder.model.gitlab.Project
 import com.github.liaoxiangyun.ideaplugin.coderaminder.settings.CodeSettingsState
 import com.google.gson.Gson
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -61,7 +60,8 @@ class HttpHelper {
     init {
         origin = settings.origin
         token = settings.token
-        branches = settings.branches.split("|").map { it.trim() } as ArrayList<String>
+        branches = settings.branches.split("|").map { it.trim() }.filter { it.isNotBlank() } as ArrayList<String>
+        println("branches=$branches")
         branch = if (branches.isNotEmpty()) {
             branches[0].trim()
         } else {
@@ -94,19 +94,11 @@ class HttpHelper {
         return settings.gitlabUser!!
     }
 
-    fun getSummary2(): GitSummary {
-        val start = System.currentTimeMillis();
-
-        val gitSummary = GitSummary()
-        val now = LocalDateTime.now()
-        val toDayEpochDay = now.toLocalDate().toEpochDay()
-        val sinceDateTime = LocalDateTime.of(CalendarUtil.getWeekDays(-1)[0], LocalTime.MIN)
-        println("两周前是 ${CalendarUtil.dateStr(sinceDateTime.toLocalDate())}")
-
-        val connect = GitlabAPI.connect(settings.origin, settings.token)
+    fun getStrs(filed: String, since: LocalDateTime?): ArrayList<String> {
+        var sinceDateTime = if (since !== null) since else LocalDateTime.of(CalendarUtil.getWeekDays(-1)[0], LocalTime.MIN)
 
         var list: List<Event>?
-        var projectIds: ArrayList<String> = arrayListOf()
+        var strs: ArrayList<String> = arrayListOf()
         var page = 0
         val replace = url_events.replace("{用户id}", "${getUser().id}")
         do {
@@ -116,19 +108,44 @@ class HttpHelper {
             println("#遍历用户事件 page=$page 本页最早时间=${CalendarUtil.dateStr(createdAt.toLocalDate())}")
             //过滤 actionName=pushed to
             for (e in list) {
-                projectIds.add(e.project_id)
+                if (filed == "projectId")
+                    strs.add(e.project_id)
+                else if (filed == "branch") {
+                    var bn = e.data?.ref ?: ""
+                    if (bn.contains('/')) {
+                        bn = bn.substring(bn.lastIndexOf('/'), bn.length)
+                        strs.add(bn)
+                    }
+                }
             }
         } while (createdAt > sinceDateTime)
-        projectIds = projectIds.distinct() as ArrayList<String>
-        println("最近2周修改的项目有${projectIds}")
+        strs = strs.filter { it.isNotBlank() }.distinct() as ArrayList<String>
+        return strs
+    }
+
+    fun getSummary2(): GitSummary {
+        val start = System.currentTimeMillis();
+
+        val gitSummary = GitSummary()
+        val now = LocalDateTime.now()
+        val toDayEpochDay = now.toLocalDate().toEpochDay()
+        val sinceDateTime = LocalDateTime.of(CalendarUtil.getWeekDays(-1)[0], LocalTime.MIN)
+        println("两周前是 ${CalendarUtil.dateStr(sinceDateTime.toLocalDate())}")
+
+        val projectIds = getStrs("projectId", sinceDateTime)
 
         val commits = projectIds.parallelStream().map { projectId ->
             val ll = arrayListOf<GitSummary.Commit>()
             var page = 0
             do {
-                val url = url_commits.format(projectId, branch, sinceDateTime.format(Constant.FORMATTER), ++page)
-                val list = getList(url, CommitRecord::class.java)
-                val cs = list.filter { !it.message.startsWith("Merge") && it.committer_email == getUser().email }.parallelStream().map { commit ->
+                val list = branches.parallelStream().flatMap { branch ->
+                    val url = url_commits.format(projectId, branch, sinceDateTime.format(Constant.FORMATTER), ++page)
+                    getList(url, CommitRecord::class.java).stream()
+                }.collect(Collectors.toList())
+                val cs = list.filter {
+                    !it.message.startsWith("Merge") && !it.message.startsWith("Revert")
+                            && it.committer_email == getUser().email
+                }.parallelStream().map { commit ->
                     val detail = getObj(url_commits_detail.format(projectId, commit.id), CommitDetail::class.java)
                     val stats = detail.stats
                     val commit = GitSummary.Commit(detail.id, projectId, "",
@@ -137,7 +154,7 @@ class HttpHelper {
                     commit
                 }.collect(Collectors.toList())
                 ll.addAll(cs)
-            } while (list.isNotEmpty() && parseTime(list.last().created_at) > sinceDateTime)
+            } while (list.isNotEmpty())
             println("projectId=$projectId branch=$branch 最近两周共${ll.size}条提交记录")
             ll.stream()
         }.flatMap { it }.collect(Collectors.toList())
@@ -229,83 +246,6 @@ class HttpHelper {
 
     private fun <T> json2List(json: String, clazz: Class<T>): List<T> {
         return JSONUtil.toList(JSONUtil.parseArray(json), clazz)
-    }
-
-
-    open fun test() {
-        val s = "[{\n" +
-                "        \"id\":219,\n" +
-                "        \"description\":\"\",\n" +
-                "        \"name\":\"share-5.2.3.8\",\n" +
-                "        \"name_with_namespace\":\"develop / share-5.2.3.8\",\n" +
-                "        \"path\":\"share-5.2.3.8\",\n" +
-                "        \"path_with_namespace\":\"develop/share-5.2.3.8\",\n" +
-                "        \"created_at\":\"2019-07-10T19:59:29.855+08:00\",\n" +
-                "        \"default_branch\":\"master\",\n" +
-                "        \"tag_list\":[\n" +
-                "\n" +
-                "        ],\n" +
-                "        \"ssh_url_to_repo\":\"git@127.0.0.1:develop/share-5.2.3.8.git\",\n" +
-                "        \"http_url_to_repo\":\"http://127.0.0.1/develop/share-5.2.3.8.git\",\n" +
-                "        \"web_url\":\"http://127.0.0.1/develop/share-5.2.3.8\",\n" +
-                "        \"readme_url\":\"http://127.0.0.1/develop/share-5.2.3.8/blob/master/README.md\",\n" +
-                "        \"avatar_url\":null,\n" +
-                "        \"star_count\":0,\n" +
-                "        \"forks_count\":0,\n" +
-                "        \"last_activity_at\":\"2019-07-11T02:53:44.831+08:00\",\n" +
-                "        \"_links\":{\n" +
-                "            \"self\":\"http://127.0.0.1/api/v4/projects/219\",\n" +
-                "            \"issues\":\"http://127.0.0.1/api/v4/projects/219/issues\",\n" +
-                "            \"merge_requests\":\"http://127.0.0.1/api/v4/projects/219/merge_requests\",\n" +
-                "            \"repo_branches\":\"http://127.0.0.1/api/v4/projects/219/repository/branches\",\n" +
-                "            \"labels\":\"http://127.0.0.1/api/v4/projects/219/labels\",\n" +
-                "            \"events\":\"http://127.0.0.1/api/v4/projects/219/events\",\n" +
-                "            \"members\":\"http://127.0.0.1/api/v4/projects/219/members\"\n" +
-                "        },\n" +
-                "        \"archived\":false,\n" +
-                "        \"visibility\":\"private\",\n" +
-                "        \"resolve_outdated_diff_discussions\":false,\n" +
-                "        \"container_registry_enabled\":true,\n" +
-                "        \"issues_enabled\":true,\n" +
-                "        \"merge_requests_enabled\":true,\n" +
-                "        \"wiki_enabled\":true,\n" +
-                "        \"jobs_enabled\":true,\n" +
-                "        \"snippets_enabled\":true,\n" +
-                "        \"shared_runners_enabled\":true,\n" +
-                "        \"lfs_enabled\":true,\n" +
-                "        \"creator_id\":14,\n" +
-                "        \"namespace\":{\n" +
-                "            \"id\":17,\n" +
-                "            \"name\":\"develop\",\n" +
-                "            \"path\":\"develop\",\n" +
-                "            \"kind\":\"group\",\n" +
-                "            \"full_path\":\"develop\",\n" +
-                "            \"parent_id\":null\n" +
-                "        },\n" +
-                "        \"import_status\":\"none\",\n" +
-                "        \"open_issues_count\":0,\n" +
-                "        \"public_jobs\":true,\n" +
-                "        \"ci_config_path\":null,\n" +
-                "        \"shared_with_groups\":[\n" +
-                "\n" +
-                "        ],\n" +
-                "        \"only_allow_merge_if_pipeline_succeeds\":false,\n" +
-                "        \"request_access_enabled\":false,\n" +
-                "        \"only_allow_merge_if_all_discussions_are_resolved\":false,\n" +
-                "        \"printing_merge_request_link_enabled\":true,\n" +
-                "        \"merge_method\":\"merge\",\n" +
-                "        \"permissions\":{\n" +
-                "            \"project_access\":null,\n" +
-                "            \"group_access\":{\n" +
-                "                \"access_level\":40,\n" +
-                "                \"notification_level\":3\n" +
-                "            }\n" +
-                "        }\n" +
-                "    }]\n"
-        val jsonToList = json2List(s, Project::class.java)
-        println("jsonToList = ${jsonToList}")
-
-
     }
 
 

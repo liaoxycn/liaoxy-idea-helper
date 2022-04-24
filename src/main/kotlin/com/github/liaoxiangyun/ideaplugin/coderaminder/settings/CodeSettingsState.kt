@@ -42,10 +42,6 @@ class CodeSettingsState : PersistentStateComponent<CodeSettingsState> {
      */
     var dailyReport = true
 
-    /**
-     * 每周报告
-     */
-    var weeklyReport = true
 
     var gitlabUser: GitlabUser = GitlabUser()
 
@@ -55,9 +51,6 @@ class CodeSettingsState : PersistentStateComponent<CodeSettingsState> {
     }
 
     override fun loadState(state: CodeSettingsState) {
-        if (state.calendar.isBlank()) {
-            state.calendar = CalendarUtil.getDefaultContent();
-        }
         XmlSerializerUtil.copyBean(state, this)
     }
 
