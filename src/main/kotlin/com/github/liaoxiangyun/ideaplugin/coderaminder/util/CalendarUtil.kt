@@ -164,10 +164,10 @@ object CalendarUtil {
 
     private fun loadData(now: LocalDate) {
         val settingsState = CodeSettingsState.instance
+        setMapByJson(settingsState.calendar)
         if (now.year == 2022) {
             setMapByJson(getContent("/json/2022.json"))
         }
-        setMapByJson(settingsState.calendar)
     }
 
 }
