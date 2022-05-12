@@ -14,6 +14,7 @@ import java.io.IOException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.util.regex.Pattern
 import java.util.stream.Collectors
 
 
@@ -21,6 +22,8 @@ class HttpHelper {
 
     private var settings: CodeSettingsState = CodeSettingsState.instance
     private var branches = arrayListOf<String>()
+    private var titleIgnorePattern: Pattern = Pattern.compile("")
+    private var messageIgnorePattern: Pattern = Pattern.compile("")
     private var branch = ""
 
     //第一步，生成私钥
@@ -59,6 +62,9 @@ class HttpHelper {
         } else {
             "develop"
         }
+
+        titleIgnorePattern = Pattern.compile(settings.titleIgnore)
+        messageIgnorePattern = Pattern.compile(settings.messageIgnore)
     }
 
     private fun getHtml(url: String): String {
@@ -116,6 +122,8 @@ class HttpHelper {
             val list = getList(url, CommitRecord::class.java)
             val cs = list.filter {
                 !it.isMerge() && !it.message.startsWith("Revert")
+                        && !titleIgnorePattern.matcher(it.title).matches()
+                        && !messageIgnorePattern.matcher(it.message).matches()
                         && it.committer_email == settings.getUser().email
             }.parallelStream().map { commit ->
                 commit.id

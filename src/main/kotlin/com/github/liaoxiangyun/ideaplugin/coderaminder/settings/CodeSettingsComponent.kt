@@ -26,6 +26,8 @@ class CodeSettingsComponent {
     private val token = JBTextField()
     private val calendar = JBTextArea(2, 10)
     private val branches = JBTextField("develop")
+    private val titleIgnore = JBTextField("")
+    private val messageIgnore = JBTextField("")
     private val reTime = JBTextField("18:30")
     private val enableCheck = JBCheckBox("开启? ")
     private val dailyReport = JBCheckBox(" 每周报告 ")
@@ -56,6 +58,16 @@ class CodeSettingsComponent {
         set(newText) {
             reTime.text = newText
         }
+    var titleIgnoreText: String
+        get() = titleIgnore.text
+        set(newText) {
+            titleIgnore.text = newText
+        }
+    var messageIgnoreText: String
+        get() = messageIgnore.text
+        set(newText) {
+            messageIgnore.text = newText
+        }
     var branchesText: String
         get() = branches.text
         set(newText) {
@@ -75,6 +87,8 @@ class CodeSettingsComponent {
     init {
         calendar.text = calendar.text.ifBlank { CalendarUtil.getDefaultContent() }
         branches.toolTipText = "多分支用英文符号'|'分隔，如 develop|master"
+        titleIgnore.toolTipText = "忽略标题中含指定字符的提交记录，必须是正则表达式，如 (Revert.+|【修改类型】：其他)"
+        messageIgnore.toolTipText = "忽略描述中含指定字符的提交记录，必须是正则表达式，如 (.|\\n)*【备注】：CI统计师默认排除(.|\\n)*"
         enableCheck.isVisible = false
         calendar.wrapStyleWord = true
         calendar.toolTipText = "0节日，1工作日，2周末"
@@ -122,6 +136,8 @@ class CodeSettingsComponent {
                 .addSeparator()
                 .addLabeledComponent(JBLabel("配置："), jButton3, 1, false)
                 .addLabeledComponent(JBLabel(" 统计分支"), branches, 1, false)
+                .addLabeledComponent(JBLabel(" 标题过滤"), titleIgnore, 1, false)
+                .addLabeledComponent(JBLabel(" 描述过滤"), messageIgnore, 1, false)
                 .addLabeledComponent(JBLabel(" 公休日历"), scrollPane, 1, false)
                 .addLabeledComponent(JBLabel(" 提醒时间"), reTime, 1, false)
                 .addComponent(dailyReport)

@@ -18,8 +18,8 @@ class JsSettingComponent {
     val panel: JPanel
     private val myText = JBTextField()
     private val modelIcon = JBCheckBox("启用model专属图标")
-    private val enableCheck = JBCheckBox("dispatch导航")
-    private val enableLoading = JBCheckBox("loading导航")
+    private val enableCheck = JBCheckBox("dispatch跳转")
+    private val enableLoading = JBCheckBox("loading跳转")
 
     val preferredFocusedComponent: JComponent
         get() = myText

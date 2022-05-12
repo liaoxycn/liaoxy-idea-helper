@@ -34,11 +34,11 @@ class DispatchLineMarkerProvider : RelatedItemLineMarkerProvider() {
             }
             val jsFile = jsService.getJSFileBy("$moduleName:${dispatch.namespace}") ?: return
             val modelsFunc = jsService.getModelsFunc(jsFile, dispatch.function)
-            //构建导航图标的builder
+            //构建跳转图标的builder
             val builder = NavigationGutterIconBuilder.create(Icons.down)
                     .setAlignment(GutterIconRenderer.Alignment.CENTER) //target是xmlTag
                     .setTargets(modelsFunc ?: jsFile)
-                    .setTooltipTitle("导航到models function")
+                    .setTooltipTitle("跳转到models function")
             val lineMarkerInfo = builder.createLineMarkerInfo(
                     Objects.requireNonNull(dispatch.typePsi.firstChild))
             result.add(lineMarkerInfo)

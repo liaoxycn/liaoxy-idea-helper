@@ -6,6 +6,7 @@ import com.github.liaoxiangyun.ideaplugin.common.services.MyApplicationService
 import com.intellij.openapi.options.Configurable
 import org.gitlab.api.GitlabAPI
 import org.jetbrains.annotations.Nls
+import java.util.regex.Pattern
 import javax.swing.JComponent
 
 /**
@@ -37,6 +38,8 @@ class CodeSettingsConfigurable : Configurable {
         modified = modified or (mySettingsComponent!!.tokenText != settings.token)
         modified = modified or (mySettingsComponent!!.calendarText != settings.calendar)
         modified = modified or (mySettingsComponent!!.reTimeText != settings.reTime)
+        modified = modified or (mySettingsComponent!!.titleIgnoreText != settings.titleIgnore)
+        modified = modified or (mySettingsComponent!!.messageIgnoreText != settings.messageIgnore)
         modified = modified or (mySettingsComponent!!.branchesText != settings.branches)
         modified = modified or (mySettingsComponent!!.enableStatus != settings.enableStatus)
         modified = modified or (mySettingsComponent!!.dailyReportStatus != settings.dailyReport)
@@ -50,6 +53,8 @@ class CodeSettingsConfigurable : Configurable {
         settings.token = mySettingsComponent!!.tokenText
         settings.calendar = mySettingsComponent!!.calendarText
         settings.reTime = mySettingsComponent!!.reTimeText
+        settings.titleIgnore = mySettingsComponent!!.titleIgnoreText
+        settings.messageIgnore = mySettingsComponent!!.messageIgnoreText
         settings.branches = mySettingsComponent!!.branchesText
         settings.enableStatus = mySettingsComponent!!.enableStatus
         settings.dailyReport = mySettingsComponent!!.dailyReportStatus
@@ -61,6 +66,9 @@ class CodeSettingsConfigurable : Configurable {
     private fun handler(state: CodeSettingsState) {
         val settings = CodeSettingsState.instance
         val gitlabAPI = GitlabAPI.connect(state.origin, state.token)
+
+        Pattern.compile(state.titleIgnore)
+        Pattern.compile(state.messageIgnore)
         settings.gitlabUser = gitlabAPI.user
         MyApplicationService.instance.codeStatisticsTask()
     }
@@ -72,6 +80,8 @@ class CodeSettingsConfigurable : Configurable {
         mySettingsComponent!!.tokenText = settings.token
         mySettingsComponent!!.calendarText = settings.calendar.ifBlank { CalendarUtil.getDefaultContent() };
         mySettingsComponent!!.reTimeText = settings.reTime
+        mySettingsComponent!!.titleIgnoreText = settings.titleIgnore
+        mySettingsComponent!!.messageIgnoreText = settings.messageIgnore
         mySettingsComponent!!.branchesText = settings.branches
         mySettingsComponent!!.enableStatus = settings.enableStatus
         mySettingsComponent!!.dailyReportStatus = settings.dailyReport
