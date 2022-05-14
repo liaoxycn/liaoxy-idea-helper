@@ -116,11 +116,6 @@ object CalendarUtil {
         return list
     }
 
-
-    open fun getDefaultContent(): String {
-        return getContent("/json/2022.json")
-    }
-
     private fun getContent(path: String): String {
         val stream = CalendarUtil.javaClass.getResourceAsStream(path)
 

@@ -78,7 +78,7 @@ class CodeSettingsConfigurable : Configurable {
         mySettingsComponent!!.userNameText = settings.userId
         mySettingsComponent!!.originText = settings.origin
         mySettingsComponent!!.tokenText = settings.token
-        mySettingsComponent!!.calendarText = settings.calendar.ifBlank { CalendarUtil.getDefaultContent() };
+        mySettingsComponent!!.calendarText = settings.calendar
         mySettingsComponent!!.reTimeText = settings.reTime
         mySettingsComponent!!.titleIgnoreText = settings.titleIgnore
         mySettingsComponent!!.messageIgnoreText = settings.messageIgnore

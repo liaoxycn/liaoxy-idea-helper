@@ -85,7 +85,6 @@ class CodeSettingsComponent {
         }
 
     init {
-        calendar.text = calendar.text.ifBlank { CalendarUtil.getDefaultContent() }
         branches.toolTipText = "多分支用英文符号'|'分隔，如 develop|master"
         titleIgnore.toolTipText = "忽略标题中含指定字符的提交记录，必须是正则表达式，如 (Revert.+|【修改类型】：其他)"
         messageIgnore.toolTipText = "忽略描述中含指定字符的提交记录，必须是正则表达式，如 (.|\\n)*【备注】：CI统计师默认排除(.|\\n)*"
