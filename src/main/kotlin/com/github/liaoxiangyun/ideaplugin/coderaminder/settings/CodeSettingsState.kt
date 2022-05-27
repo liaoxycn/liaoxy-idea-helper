@@ -38,7 +38,7 @@ class CodeSettingsState : PersistentStateComponent<CodeSettingsState> {
     var reTime = "18:30"
     var branches = "develop"
     var titleIgnore = "(Revert.+|【修改类型】：其它)"
-    var messageIgnore = "(.|\\n)*【备注】：CI统计师默认排除(.|\\n)*"
+    var messageIgnore = "(.|\\n)*【备注】：CI统计时默认排除(.|\\n)*"
 
     /**
      * 每日报告
