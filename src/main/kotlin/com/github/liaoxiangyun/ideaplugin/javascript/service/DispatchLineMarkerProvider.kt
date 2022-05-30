@@ -15,37 +15,59 @@ import com.intellij.psi.impl.source.tree.LeafPsiElement
 import java.util.*
 
 class DispatchLineMarkerProvider : RelatedItemLineMarkerProvider() {
-    override fun collectNavigationMarkers(element: PsiElement, result: MutableCollection<in RelatedItemLineMarkerInfo<*>?>) {
+    init {
+        setting = JsSettingsState.instance
+    }
+
+    override fun collectNavigationMarkers(
+        element: PsiElement,
+        result: MutableCollection<in RelatedItemLineMarkerInfo<*>?>
+    ) {
         //筛选 dispatch
-        if (element.textLength == 8 && element is LeafPsiElement
-                && element.text == "dispatch") {
-            if (!JsSettingsState.instance.enableStatus) {
-                return
-            }
-            val dispatch = getDispatch(element)
-            if (dispatch == null || !dispatch.valid) {
-                return
-            }
-            println("========= dispatch = $dispatch")
-            val moduleName = JsService.getModulePath(element.containingFile.virtualFile)
-            val jsService = JsService.getInstance(element.project)
-            if (!jsService.isUmi) {
-                return
-            }
-            val jsFile = jsService.getJSFileBy("$moduleName:${dispatch.namespace}") ?: return
-            val modelsFunc = jsService.getModelsFunc(jsFile, dispatch.function)
-            //构建跳转图标的builder
-            val builder = NavigationGutterIconBuilder.create(Icons.down)
-                    .setAlignment(GutterIconRenderer.Alignment.CENTER) //target是xmlTag
-                    .setTargets(modelsFunc ?: jsFile)
-                    .setTooltipTitle("跳转到models function")
-            val lineMarkerInfo = builder.createLineMarkerInfo(
-                    Objects.requireNonNull(dispatch.typePsi.firstChild))
-            result.add(lineMarkerInfo)
+        if (element is LeafPsiElement && element.textLength == 8 && element.text == "dispatch") {
+            dispatchMarkers(element, result)
+        } else if (element is LeafPsiElement && element.textLength == 7 && element.text == "current") {
+            refMarkers(element, result)
         }
     }
 
+    private fun refMarkers(element: LeafPsiElement, result: MutableCollection<in RelatedItemLineMarkerInfo<*>?>) {
+        if (!setting.refStatus) {
+            return
+        }
+
+    }
+
+
+    private fun dispatchMarkers(element: LeafPsiElement, result: MutableCollection<in RelatedItemLineMarkerInfo<*>?>) {
+        if (!setting.enableStatus) {
+            return
+        }
+        val dispatch = getDispatch(element)
+        if (dispatch == null || !dispatch.valid) {
+            return
+        }
+        val moduleName = JsService.getModulePath(element.containingFile.virtualFile)
+        val jsService = JsService.getInstance(element.project)
+        if (!jsService.isUmi) {
+            return
+        }
+        val jsFile = jsService.getJSFileBy("$moduleName:${dispatch.namespace}") ?: return
+        val modelsFunc = jsService.getModelsFunc(jsFile, dispatch.function)
+        //构建跳转图标的builder
+        val builder = NavigationGutterIconBuilder.create(Icons.down)
+            .setAlignment(GutterIconRenderer.Alignment.CENTER) //target是xmlTag
+            .setTargets(modelsFunc ?: jsFile)
+            .setTooltipTitle("跳转到models function")
+        val lineMarkerInfo = builder.createLineMarkerInfo(
+            Objects.requireNonNull(dispatch.typePsi.firstChild)
+        )
+        result.add(lineMarkerInfo)
+    }
+
+
     companion object {
+        var setting: JsSettingsState = JsSettingsState()
         private fun getDispatch(element: LeafPsiElement): Dispatch? {
             val c1 = element.context
             if (c1 == null || c1 !is JSReferenceExpressionImpl) {

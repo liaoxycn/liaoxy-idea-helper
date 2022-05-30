@@ -14,6 +14,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 @State(name = "com.github.liaoxiangyun.ideaplugin.js.settings.JsSettingsState", storages = [Storage("JsSettingsState.xml")])
 class JsSettingsState : PersistentStateComponent<JsSettingsState> {
     var enableStatus = false
+    var refStatus = false
     var enableLoadingStatus = false
     var modelIcon = false
 
