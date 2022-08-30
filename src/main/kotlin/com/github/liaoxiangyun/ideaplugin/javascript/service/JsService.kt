@@ -52,9 +52,20 @@ class JsService(private val project: Project) {
         }
     }
 
-    fun getJSFileBy(key: String): JSFile? {
-        val ref = modelsMap[key]
-        return ref?.get()
+    fun getJSFileBy(moduleName: String, key: String): JSFile? {
+        var mapKey = "$moduleName:${key}"
+        println(mapKey)
+        val ref = modelsMap[mapKey]
+        var jsFile = ref?.get()
+        if (jsFile == null) {
+            jsFile = modelsMap[key]?.get()
+            if (jsFile != null) {
+                println("find2. jsFile = ${jsFile.name}")
+            }
+        } else {
+            println("find1. jsFile = ${jsFile.name}")
+        }
+        return jsFile
     }
 
     private fun searchModelsDir(dir: PsiDirectory) {
@@ -101,7 +112,7 @@ class JsService(private val project: Project) {
         if (jsFile == null) return null
         val export = PsiTreeUtil.getChildOfType(jsFile, ES6ExportDefaultAssignment::class.java) ?: return null
         val jsObj = PsiTreeUtil.getChildOfType(export, JSObjectLiteralExpression::class.java) ?: return null
-        for (jsP in PsiTreeUtil.getChildrenOfType(jsObj, JSPropertyImpl::class.java)) {
+        for (jsP in PsiTreeUtil.getChildrenOfType(jsObj, JSPropertyImpl::class.java)!!) {
             if (jsP.name == EFFECTS || jsP.name == REDUCERS) {
                 val jsExpression = jsP.value ?: return null
                 if (jsExpression is JSObjectLiteralExpressionImpl) {
@@ -153,7 +164,13 @@ class JsService(private val project: Project) {
             val l = System.currentTimeMillis() - s
             val msg = "找到${this.total}个model，共耗时${l}ms"
             println("【loadIndex】 $msg")
-            println(this.modelsMap)
+
+            var sb = StringBuffer()
+            sb.appendln()
+            for (e in this.modelsMap) {
+                sb.appendln("${e.key} = ${e.value.get()?.virtualFile?.path}")
+            }
+            println(sb.toString())
             return msg
         }
         return ""
@@ -168,7 +185,7 @@ class JsService(private val project: Project) {
         private const val MODELS: String = "models"
         private const val PAGES: String = "pages"
         private const val SRC: String = "src"
-        private const val UMI_CON: String = ".umirc.js"
+        private const val UMI_CON: String = "package.json"
 
         open fun getInstance(project: Project): JsService {
             return ServiceManager.getService(project, JsService::class.java)
@@ -183,18 +200,23 @@ class JsService(private val project: Project) {
         open fun getModulePath(file: VirtualFile?): String {
             if (file == null) return ""
             var temp: VirtualFile? = file
+            var i = 0
             while (true) {
                 val parent = temp?.parent
-                if (parent?.name == PAGES || parent?.name == SRC) {
-                    return if (temp?.name == MODELS) {
-                        parent.path
-                    } else if (temp?.isDirectory == true) {
-                        temp.path
-                    } else {
-                        parent.path
-                    }
+                if (temp == null || parent == null || !parent.isDirectory) {
+                    return ""
+                }
+                if (parent.name == SRC) {
+                    return parent.path
+                }
+                if (parent.findChild(MODELS) != null) {
+                    return parent.path
                 }
                 temp = parent
+                i++
+                if (i > 10) {
+                    break
+                }
             }
             return ""
         }

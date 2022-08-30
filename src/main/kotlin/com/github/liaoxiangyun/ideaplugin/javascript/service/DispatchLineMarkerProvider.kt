@@ -1,17 +1,23 @@
 package com.github.liaoxiangyun.ideaplugin.javascript.service
 
+import cn.hutool.json.JSONUtil
 import com.github.liaoxiangyun.ideaplugin.javascript.constant.Icons
 import com.github.liaoxiangyun.ideaplugin.javascript.model.Dispatch
 import com.github.liaoxiangyun.ideaplugin.javascript.setting.JsSettingsState
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
+import com.intellij.lang.javascript.index.JSSymbolUtil
+import com.intellij.lang.javascript.index.JavaScriptIndex
+import com.intellij.lang.javascript.psi.JSReferenceExpression
 import com.intellij.lang.javascript.psi.impl.JSCallExpressionImpl
 import com.intellij.lang.javascript.psi.impl.JSObjectLiteralExpressionImpl
 import com.intellij.lang.javascript.psi.impl.JSReferenceExpressionImpl
+import com.intellij.lang.javascript.psi.stubs.impl.JSImplicitElementImpl
 import com.intellij.openapi.editor.markup.GutterIconRenderer
 import com.intellij.psi.PsiElement
 import com.intellij.psi.impl.source.tree.LeafPsiElement
+import com.intellij.psi.util.PsiTreeUtil
 import java.util.*
 
 class DispatchLineMarkerProvider : RelatedItemLineMarkerProvider() {
@@ -24,9 +30,9 @@ class DispatchLineMarkerProvider : RelatedItemLineMarkerProvider() {
         result: MutableCollection<in RelatedItemLineMarkerInfo<*>?>
     ) {
         //筛选 dispatch
-        if (element is LeafPsiElement && element.textLength == 8 && element.text == "dispatch") {
+        if (element is LeafPsiElement && element.text == "dispatch") {
             dispatchMarkers(element, result)
-        } else if (element is LeafPsiElement && element.textLength == 7 && element.text == "current") {
+        } else if (element is LeafPsiElement &&  element.text == "current") {
             refMarkers(element, result)
         }
     }
@@ -35,6 +41,24 @@ class DispatchLineMarkerProvider : RelatedItemLineMarkerProvider() {
         if (!setting.refStatus) {
             return
         }
+//        val parentOfType = PsiTreeUtil.getParentOfType(element, JSReferenceExpression::class.java)
+//        val ref = parentOfType?.let {
+//            val calcRefExprValue = JSSymbolUtil.calcRefExprValue(it)
+//            print("${calcRefExprValue?.name} , calcRefExprValue=")
+//            println(JSONUtil.toJsonStr(calcRefExprValue))
+//            calcRefExprValue
+//        }
+//        val javaScriptIndex = JavaScriptIndex.getInstance(element.project)
+//
+//
+//        val symbolsByName2 = javaScriptIndex.getSymbolsByName("onRef", false)
+//        println("==========symbolsByName2")
+//        for (item in symbolsByName2) {
+//            item as JSImplicitElementImpl
+//            print("name=${item.name} ${item} presentation= ${JSONUtil.toJsonStr(item.presentation?.locationString)} ; ")
+//        }
+//        println()
+
 
     }
 
@@ -52,7 +76,7 @@ class DispatchLineMarkerProvider : RelatedItemLineMarkerProvider() {
         if (!jsService.isUmi) {
             return
         }
-        val jsFile = jsService.getJSFileBy("$moduleName:${dispatch.namespace}") ?: return
+        val jsFile = jsService.getJSFileBy(moduleName, dispatch.namespace) ?: return
         val modelsFunc = jsService.getModelsFunc(jsFile, dispatch.function)
         //构建跳转图标的builder
         val builder = NavigationGutterIconBuilder.create(Icons.down)

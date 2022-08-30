@@ -52,12 +52,6 @@ class JsSettingComponent {
 
             jbLabel.text = msg
         }
-        if (!jsService.isUmi) {
-            jButton.isEnabled = false
-            modelIcon.isEnabled = false
-            enableCheck.isEnabled = false
-            enableLoading.isEnabled = false
-        }
 
         enableLoading.isEnabled = false
         panel = FormBuilder.createFormBuilder()
